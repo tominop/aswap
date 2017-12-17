@@ -1,0 +1,9 @@
+*.tar.gz
+*.log.*
+node_modules
+tokill
+github.pub
+github
+public/arh/*
+public/js/accounts.js
+

@@ -1,0 +1,181 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+    font-family: "Trebuchet MS", arial, helvetica, sans-serif;
+    color: #7c7c7c;
+}
+
+/* Set padding to keep content from hitting the edges */
+
+/*.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}*/
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+
+.dl-horizontal dt { white-space: normal; }
+
+/* Set width on the form input elements since they're 100% wide by default */
+
+input,
+select,
+textarea { max-width: 280px; }
+
+/* Set padding to display errors that occur during databinding */
+
+.padding-error { padding-top: 20px; }
+
+@media only screen and (max-width: 767px) {
+    .nofloat {
+        float: none;
+        padding: 10px 15px;
+    }
+}
+
+@media (min-width: 768px) {
+    body { padding-top: 98px; }
+
+    .navbar-default {
+        background-color: white;
+        border: none;
+    }
+
+    .navbar { min-height: 98px; }
+
+    .navbar-brand { height: 98px; }
+
+    .navbar-nav > li > a { padding: 39px 18px; }
+
+    a { color: #7c7c7c; }
+
+    .navbar-default .nav > li > a:hover,
+    .navbar-default .nav > li > a:focus {
+        background: #00a6f1;
+        color: white;
+    }
+
+    .navbar-brand {
+        background-image: url("Images/logo.png");
+        background-repeat: no-repeat;
+        background-position: 15px 20px;
+        width: 192px;
+        color: transparent;
+    }
+
+    .navbar-default .navbar-brand, .navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus { color: transparent; }
+}
+
+.background {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.page-home {
+    background-image: url("Images/home_background.jpg");
+    height: 820px; /*1076*/
+}
+
+.page-home-blue-line {
+    position: absolute;
+    background-image: url("Images/home_blue_line.png");
+    height: 612px;
+    top: 350px;
+    width: 100%;
+}
+
+.page-home-text {
+    position: relative;
+    top: 72px;
+    padding: 20px 30px;
+    text-align: justify;
+    background: rgba(0, 0, 0, 0.45);
+    font-weight: bold;
+    font-size: 30px;
+    line-height: 34px;
+    color: white;
+}
+
+.page-home-feedback {
+    position: relative;
+    margin-top: 200px;
+    color: white;
+}
+
+.page-home-feedback-title {
+    font-weight: bold;
+    font-size: 47px;
+    line-height: 50px;
+}
+
+.page-home-feedback-description {
+    font-weight: bold;
+    font-size: 25px;
+    line-height: 25px;
+}
+
+.page-home-feedback .phone {
+    font-size: 40px;
+    font-weight: bold;
+    line-height: 73px;
+}
+
+.page {
+    padding-top: 40px;
+    font-size: 20px;
+}
+
+.page-blue {
+    background: linear-gradient(#56B536, #409124); /*35b3e8, 0796d2*/
+    background-color: #409124;/*00a6f1*/
+    color: #fff;
+}
+
+.page-yel {
+    background: linear-gradient(#F5F4DA, #FAF878); /*35b3e8, 0796d2*/
+    background-color: #FAF878;/*00a6f1*/
+}
+.page h1 {
+    font-size: 35px;
+    margin-bottom: 40px;
+    font-weight: bold;
+}
+
+.page p { margin-bottom: 28px; }
+
+.copyright {
+    background-image: url("Images/logo-footer.png");
+    background-repeat: no-repeat;
+    background-position: 0 35px;
+    height: 75px;
+    padding: 40px 0 0 150px;
+}
+.b-container{
+    width:200px;
+    height:150px;
+    background-color: #ccc;
+    margin:0px auto;
+    padding:10px;
+    font-size:30px;
+    color: #fff;
+}
+.b-popup{
+    width:100%;
+    min-height:100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow:hidden;
+    position:fixed;
+    top:0px;
+}
+.b-popup .b-popup-content{
+    margin:150px auto 0px auto;
+    width:420px;
+    height: 630px;
+    padding:10px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px #000;
+/*   display: none;*/
+}
