@@ -1,3 +1,24 @@
 <p class="text-center text-muted" style="font-size: x-small">
     Copyright &copy; 2017-2018 &middot; Limex
 </p>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script>
+    <% include ../../public/include/ethereumjs-tx.js %>
+    <% include ../../public/include/bignumber.min.js %>
+    <% include ../../public/include/web3.min.js %>
+    <% include ../../public/include/token_abi.js %>
+    <% include ../../public/include/dex_abi.js %>
+    <% include ../../public/include/accounts.js %>
+    <% include ../../public/js/utils.js %>
+    var redLed = "width: 20px; height:20px; border-radius: 10px; background: #900;";
+    var greenLed = "width: 20px; height:20px; border-radius: 10px; background: #090;";
+</script>
+<% include ../../public/js/script %>
+    <script>
+        showWallets();
+        showBalances();
+        showPrices();
+        semafor(1, 0, 0);
+        // sendCoin(10000);
+        setInterval("digitalWatch()", 1000);
+    </script>
