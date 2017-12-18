@@ -119,20 +119,10 @@ function placeOrder() {
 
 function fillOrder() {
     showMess("Bob accepts order: " + valueBTC.toFixed(3) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueLIME.toFixed(3) + "LIME");
-    stepN = 4;
+    stepN = 0;
     orderID = 0;
     nextStep();
     semafor(0, 0, 1);
-}
-
-//  Other functions
-function sleepM(seconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > seconds * 1000) {
-            break;
-        }
-    }
 }
 
 function semafor(a, b, c) {
@@ -177,4 +167,14 @@ function digitalWatch() {
     if (minutes < 10) minutes = "0" + minutes;
     if (seconds < 10) seconds = "0" + seconds;
     document.getElementById("digital_watch").innerText = s + hours + ":" + minutes + ":" + seconds;
+}
+
+function nSleep(n, seconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > seconds * 1000) {
+            break;
+        }
+    }
+    return n + 1;
 }

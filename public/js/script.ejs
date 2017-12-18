@@ -1,21 +1,17 @@
 <script type="text/javascript">
     //  Initial values
-    var valueBTC = valueETH = valueLIME = feeLIME = 0;
+    var valueBTC = valueETH = valueLIME = 0;
     var summBTCA = summETHA = summLIMEA = 0;
     var summBTCB = summETHB = summLIMEB = 0;
     var summBTCP = summETHP = summLIMEP = 0;
     var ethPriceBTC = ethPriceUSD = limePrice = 0;
-    var txBTCHash = txETHHash = '';
-    var orderID = 0;
-    var stepN = 0;
+    var nStr = stepN = orderID = 0;
     var value0 = Lime3.toHex(0);
     var gasLimit = Lime3.toHex(4700000);
     var gasPrice = Lime3.toHex(25000000000);
-    var nStr = 0;
-
 
     function nextStep() {
-        stepN = stepN + 1;
+        stepN = nSleep(stepN, 2); // + 1;
         document.getElementById('ind').value = stepN;
         if (stepN == 1) {
             showMess("Smart contract DEx: startDEx in progress");
@@ -54,19 +50,19 @@
             showBalances();
             showMess('Atomic swap is finished. Plasmoid makes Tx to cancel pledges');
             var tx = makeLimeTX(addrsETHP, ethPrivateKeyP, addrsETHA, valueLIME);
-            showMess('Plasmoid sends LIMEs to Alice');
+            showMess('Plasmoid sends ' + valueLIME.toFixed(3) + ' LIMEs to Alice');
             document.getElementById('bobStatus').innerText = "Bob received " + valueBTC.toFixed(6) + " BTC";
             sendTx(addrsETHP, addrsETHA, tx);
         } else if (stepN == 8) {
             showMess("Plasmoid makes Tx to cancel Bobs pledge");
             var tx = makeLimeTX(addrsETHP, ethPrivateKeyP, addrsETHB, valueLIME);
-            showMess('Plasmoid sends LIMEs to Bob');
+            showMess('Plasmoid sends ' + valueLIME.toFixed(3) + ' LIMEs to Bob');
             sendTx(addrsETHP, addrsETHB, tx);
         } else if (stepN == 9) {
             showMess('Smart contract DEx: outDepo in progress');
             callDExOut();
         } else if (stepN == 10) {
-            semafor(1, 1, 1);
+            semafor(0, 0, 0);
             showBalances();
             showMess("Atomic swap BTC/ETH finished successfully!");
         }
@@ -323,16 +319,20 @@
     }
 
     function waitConfirmEth(hash) {
-        for (var i = 0; i < 300; i++) {
+        var interval;
+        var timeOut = setTimeout(function() {
+            clearInterval(interval);
+            showMess('Error while mining ETH Tx in next 5 minuts');
+        }, 300000);
+        interval = setInterval(function() {
             var block = Eth3.eth.getTransaction(hash);
             if (block != null & block.blockNumber > 0) {
                 showMess('ETH Tx is confirmed in block ' + block.blockNumber);
+                clearTimeout(timeOut);
+                clearInterval(interval);
                 nextStep();
                 return
-            } else {
-                sleepM(1);
             }
-        }
-        showMess('Error while mining ETH Tx in next 5 minuts');
+        }, 5000);
     }
 </script>
