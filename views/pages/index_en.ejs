@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+	<% include ../partials/head %>
+	<% include ../../public/js/script %>
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<body class="container-fluid">
+
+	<header>
+		<% include ../partials/header %>
+	</header>
+
+	<main>
+<!--		<div class="row"> -->
+		<div class="jumbotron text-center" style="padding: 20px">
+			<div>Manual trading (% of balance)</div>
+			<div>
+			<input type="number" id="pct" min="10" max="99" value="90" style="width: 30px"><text> % </text>
+			<button type="button" class="btn btn-mini btn-success" id="buy" onClick="buy()">Buy</button>
+			<button type="button" class="btn btn-mini btn-danger" id="sell" onClick="sell()">Sell</button>
+		 	</div><hr />
+			<div>Stop orders</div>
+			<div>
+			High price for sell <input type="number" id="high_price" min="0" max="999" style="width: 50px" step="0.01">
+			<text> USDT </text>
+			</br>
+			Low price for buy   <input type="number" id="low_price" min="0" max="999" style="width: 50px" step="0.01">
+			<text> USDT </text>
+			</div>
+			<div>
+			<button type="button" class="btn btn-mini btn-success" id="ordrer" onClick="startOrder()">Place Stop Order(s)</button>
+			<button type="button" class="btn btn-mini btn-danger" id="reset" onClick="stopAuto()">Reset all orders</button>
+			</div><hr />
+			<div>Auto trading</div>
+			<div>
+			<button type="button" class="btn btn-mini btn-success" id="auto" onClick="startAuto()">Start Auto Trading</button>
+			<button type="button" class="btn btn-mini btn-danger" id="stop" onClick="stopAuto()">Stop all tradings</button>
+ 			</div><hr />
+		 	Status: <text id="mode" >Wait command...</text>
+<!--		</div> -->
+		</div>
+        </main>
+
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+	<script>init_state(false)</script>
+	</body>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+	<% include ../partials/head %>
+	<% include ../../public/js/script %>
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<body class="container-fluid">
+
+	<header>
+		<% include ../partials/header %>
+	</header>
+
+	<main>
+<!--		<div class="row"> -->
+		<div class="jumbotron text-center" style="padding: 20px">
+			<div>Manual trading (% of balance)</div>
+			<div>
+			<input type="number" id="pct" min="10" max="99" style="width: 50px"><text> % </text>
+			<button type="button" class="btn btn-mini btn-success" id="buy" onClick="buy()">Buy</button>
+			<button type="button" class="btn btn-mini btn-warning" id="sell" onClick="sell()">Sell</button>
+		 	</div><hr />
+			<div>Auto trading</div>
+			<div>
+			<text>Param1&nbsp;</text><input type="number" id="l_pct" min="0" max="9" style="width: 50px" step="0.01">
+			<text> Param2&nbsp;</text><input type="number" id="d_pct" min="0" max="9" style="width: 50px" step="0.01">
+			</div></br>
+<!--			<div>Stop orders</div>
+			<div>
+			Sell price <input type="number" id="high_price" min="0" max="999" style="width: 50px" step="0.01">
+			<text> USDT </text>
+			</br>
+			Buy price <input type="number" id="low_price" min="0" max="999" style="width: 50px" step="0.01">
+			<text> USDT </text></div></br> -->
+			<div>
+			<button type="button" class="btn btn-mini btn-primary" id="test" onClick="test()">Test parameters</button>
+			</div></br>
+			<div>
+			<button type="button" class="btn btn-mini btn-success" id="auto" onClick="startAuto()">Start Auto</button>
+<!--			<button type="button" class="btn btn-mini btn-warning" id="auto1" onClick="startAuto1()">Auto sell</button> -->
+			</div></br>
+			<button type="button" class="btn btn-mini btn-danger" id="stop" onClick="stopAuto()">Reset all!</button>
+ 			<hr />
+		 	Status: <text id="mode">Waiting command...</text></br>
+		 	<text id="cmd"></text></br>
+			
+<!--		</div> -->
+		</div>
+        </main>
+
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+	<script>
+	is_cmd();
+</script>
+</body>
