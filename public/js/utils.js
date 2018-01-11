@@ -1,3 +1,5 @@
+var hostBtcApi = "http://localhost:8100/api/btc/";
+var hostEthApi = "http://localhost:8101/api/eth/";
 //  Show wallets function
 function showWallets() {
     //  Alice's wallet
@@ -15,21 +17,29 @@ function showWallets() {
 //  ShowBalanses function
 function showBalances() {
     //  Alice's wallet
-    summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
-    document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
-    $.get(hostBtc + '/addrs/' + addrsBTCA + '/balance')
+    $.get(hostEthApi + addrsETHA)
         .then(function(d) {
-            summBTCA = (d.final_balance / 10 ** 8);
+            summETHA = d.balance;
+            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
+            document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
+        });
+    $.get(hostBtcApi + addrsBTCA)
+        .then(function(d) {
+            summBTCA = d.balance;
             document.getElementById('aliceBtcBalance').innerText = ' ' + summBTCA.toFixed(6) + ' '
         });
     summLIMEA = tokenContract.balanceOf(addrsETHA) / 10 ** 9;
     document.getElementById('aliceLimeBalance').innerText = ' ' + summLIMEA.toFixed(3) + ' ';
     //  Bob's wallet
-    summETHB = Eth3.fromWei(Eth3.eth.getBalance(addrsETHB), "ether");
-    document.getElementById('bobEthBalance').innerText = ' ' + summETHB.toFixed(3) + ' ';
-    $.get(hostBtc + '/addrs/' + addrsBTCB + '/balance')
+    $.get(hostEthApi + addrsETHB)
         .then(function(d) {
-            summBTCB = (d.final_balance / 10 ** 8);
+            summETHB = d.balance;
+            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
+            document.getElementById('bobEthBalance').innerText = ' ' + summETHB.toFixed(3) + ' ';
+        });
+    $.get(hostBtcApi + addrsBTCB)
+        .then(function(d) {
+            summBTCB = d.balance;
             document.getElementById('bobBtcBalance').innerText = ' ' + summBTCB.toFixed(6) + ' '
         });
     summLIMEB = tokenContract.balanceOf(addrsETHB) / 10 ** 9;
@@ -59,8 +69,8 @@ function showPrices() {
 
 function showMess(s) {
     nStr = nStr + 1;
-    document.getElementById('progressStatus').innerText = nStr.toString() + ': ' + s;
-    console.log(nStr + ': ' + s);
+    document.getElementById('progressStatus').innerText = s;
+    console.log(timeNow + ': ' + s);
 }
 
 //  Order's functions
@@ -132,6 +142,13 @@ function semafor(a, b, c) {
     else if (b == 0) document.getElementById('bobLed').style = greenLed;
     if (c == 1) document.getElementById('plasmoidLed').style = redLed;
     else if (c == 0) document.getElementById('plasmoidLed').style = greenLed;
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > 2 * 1000) {
+            break;
+        }
+    }
+    return false;
 }
 
 function sendEth1() {
@@ -151,7 +168,7 @@ function sendCoin(value) {
 }
 
 function digitalWatch() {
-    var s = "am ";
+    var s = " a.m.";
     var date = new Date();
     var hours = date.getUTCHours();
     var hours1 = date.getHours();
@@ -161,12 +178,13 @@ function digitalWatch() {
 
     if (hours > 12) {
         hours = hours - 12;
-        s = "pm ";
+        s = " p.m.";
     }
-    if (hours < 10) hours = " " + hours.toString();
+    if (hours < 10) hours = "0" + hours.toString();
     if (minutes < 10) minutes = "0" + minutes;
     if (seconds < 10) seconds = "0" + seconds;
-    document.getElementById("digital_watch").innerText = s + hours + ":" + minutes + ":" + seconds;
+    timeNow = hours + ":" + minutes + ":" + seconds;
+    document.getElementById("digital_watch").innerText = hours + ":" + minutes + ":" + seconds + s;
 }
 
 function nSleep(n, seconds) {
@@ -177,4 +195,9 @@ function nSleep(n, seconds) {
         }
     }
     return n + 1;
+}
+
+function showDate() {
+    var date = new Date();
+    document.getElementById("dateNow").innerText = date.toDateString()
 }

@@ -6,12 +6,13 @@
     var summBTCP = summETHP = summLIMEP = 0;
     var ethPriceBTC = ethPriceUSD = limePrice = 0;
     var nStr = stepN = orderID = 0;
+    var timeNow = "";
     var value0 = Lime3.toHex(0);
     var gasLimit = Lime3.toHex(4700000);
     var gasPrice = Lime3.toHex(25000000000);
 
     function nextStep() {
-        stepN = nSleep(stepN, 2); // + 1;
+        stepN = stepN + 1;
         document.getElementById('ind').value = stepN;
         if (stepN == 1) {
             showMess("Smart contract DEx: startDEx in progress");
@@ -19,17 +20,17 @@
             document.getElementById('aliceStatus').innerText = "Filling order: smart contract DEx in progress";
             startDEx();
         } else if (stepN == 2) {
-            semafor(1, 0, 0);
+            var ff = semafor(1, 0, 0);
             showMess('Alice makes pledge Tx in Limes');
             var tx = makeLimeTX(addrsETHA, ethPrivateKeyA, addrsETHP, valueLIME);
-            semafor(0, 0, 1);
+            var ff = semafor(0, 0, 1);
             showMess("Plasmoid sends Alice's Tx to Limex");
             sendTx(addrsETHA, addrsETHP, tx);
         } else if (stepN == 3) {
-            semafor(0, 1, 0);
+            var ff = semafor(0, 1, 0);
             showMess('Bob makes pledge Tx in Limes');
             var tx = makeLimeTX(addrsETHB, ethPrivateKeyB, addrsETHP, valueLIME);
-            semafor(0, 0, 1);
+            var ff = semafor(0, 0, 1);
             showMess("Plasmoid sends Bob's Tx to Limex");
             sendTx(addrsETHB, addrsETHP, tx);
         } else if (stepN == 4) {
@@ -37,16 +38,16 @@
             showMess('Smart contract DEx: inDepo in progress');
             callDExIn();
         } else if (stepN == 5) {
-            semafor(1, 1, 0);
+            var ff = semafor(1, 1, 0);
             showMess('Alice & Bob make two atomic swap Tx');
             atomicSwap();
         } else if (stepN == 6) {
-            semafor(0, 0, 1);
+            var ff = semafor(0, 0, 1);
             showBalances();
             document.getElementById('aliceStatus').innerText = "Alice received " + valueETH.toFixed(3) + " ETH";
             showMess("Atomic swap BTC/ETH in progress, waiting for BTC Tx confirmation");
         } else if (stepN == 7) {
-            semafor(0, 0, 1);
+            var ff = semafor(0, 0, 1);
             showBalances();
             showMess('Atomic swap is finished. Plasmoid makes Tx to cancel pledges');
             var tx = makeLimeTX(addrsETHP, ethPrivateKeyP, addrsETHA, valueLIME);
@@ -62,7 +63,7 @@
             showMess('Smart contract DEx: outDepo in progress');
             callDExOut();
         } else if (stepN == 10) {
-            semafor(0, 0, 0);
+            var ff = semafor(0, 0, 0);
             showBalances();
             showMess("Atomic swap BTC/ETH finished successfully!");
         }
@@ -231,7 +232,7 @@
         makeBTCTx(addrsBTCA, wifPrivateKeyA, addrsBTCB, valueBTC * 10 ** 8, function(txHash) {
             showMess('BTC Tx is successful. Checking Bitcoin confirmation');
             console.log('BTC Tx hash: ' + txHash);
-            semafor(3, 0, 1);
+            var ff = semafor(3, 0, 1);
             waitConfirmBtc(txHash);
             /*            param = '?a=' + txHash //addrsFrom.toString();
                         $.post('/dex/checkTx' + param).done(function(ls) {
@@ -249,7 +250,7 @@
         showMess('Bob send ' + valueETH.toFixed(3) + 'ETH Tx to Ethereum');
         Eth3.eth.sendRawTransaction(tx, function(err, hash) {
             if (!err) {
-                semafor(0, 3, 1);
+                var ff = semafor(0, 3, 1);
                 showMess('ETH Tx is success. Checking Ethereum confirmation');
                 console.log('ETH Tx hash: ' + hash);
                 waitConfirmEth(hash);
