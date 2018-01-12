@@ -1,7 +1,17 @@
-var hostBtcApi = "http://localhost:8100/api/btc/";
-var hostEthApi = "http://localhost:8200/api/eth/";
-var hostLimeApi = "http://localhost:8201/api/eth/";
+var hostBtcApi = "http://localhost:8100/btc/";
+var hostEthApi = "http://localhost:8200/eth/";
+var hostLimeApi = "http://localhost:8201/lime/";
 //  Show wallets function
+
+function iniApi() {
+    $.get(hostEthApi + 'api/' + tokenETH)
+        .then(function(d) {
+            console.log('ETH API enabled wia host: ' + d.host + ', currentc block ' + d.block);
+            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
+            // document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
+        });
+}
+
 function showWallets() {
     //  Alice's wallet
     document.getElementById('aliceEth').innerText = ' ' + addrsETHA + ' ';
