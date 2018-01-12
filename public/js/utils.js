@@ -1,4 +1,5 @@
-var hostBtcApi = 'http://localhost:8100/btc/';
+var hostBtcApi = 'http://localhost:8100/btc/'; //  main net
+//var hostBtcApi = 'http://localhost:8103/btc3/';    // testnet3
 var hostEthApi = 'http://localhost:8200/eth/';
 var hostLimeApi = 'http://localhost:8201/lime/';
 //  Show wallets function
