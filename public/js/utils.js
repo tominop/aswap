@@ -1,5 +1,6 @@
 var hostBtcApi = "http://localhost:8100/api/btc/";
-var hostEthApi = "http://localhost:8101/api/eth/";
+var hostEthApi = "http://localhost:8200/api/eth/";
+var hostLimeApi = "http://localhost:8201/api/eth/";
 //  Show wallets function
 function showWallets() {
     //  Alice's wallet
