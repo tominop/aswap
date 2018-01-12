@@ -1,6 +1,18 @@
-var hostBtcApi = "http://localhost:8100/api/btc/";
-var hostEthApi = "http://localhost:8101/api/eth/";
+var hostBtcApi = 'http://localhost:8100/btc/'; //  main net
+//var hostBtcApi = 'http://localhost:8103/btc3/';    // testnet3
+var hostEthApi = 'http://localhost:8200/eth/';
+var hostLimeApi = 'http://localhost:8201/lime/';
 //  Show wallets function
+
+function initApi() {
+    $.get(hostEthApi + 'api/' + tokenEthApi)
+        .then(function(d) {
+            console.log('ETH API enabled on host: ' + d.host);
+            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
+            // document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
+        });
+}
+
 function showWallets() {
     //  Alice's wallet
     document.getElementById('aliceEth').innerText = ' ' + addrsETHA + ' ';
@@ -17,13 +29,13 @@ function showWallets() {
 //  ShowBalanses function
 function showBalances() {
     //  Alice's wallet
-    $.get(hostEthApi + addrsETHA)
+    $.get(hostEthApi + 'balance/' + addrsETHA)
         .then(function(d) {
             summETHA = d.balance;
             //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
             document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
         });
-    $.get(hostBtcApi + addrsBTCA)
+    $.get(hostBtcApi + 'balance/' + addrsBTCA)
         .then(function(d) {
             summBTCA = d.balance;
             document.getElementById('aliceBtcBalance').innerText = ' ' + summBTCA.toFixed(6) + ' '
@@ -31,13 +43,13 @@ function showBalances() {
     summLIMEA = tokenContract.balanceOf(addrsETHA) / 10 ** 9;
     document.getElementById('aliceLimeBalance').innerText = ' ' + summLIMEA.toFixed(3) + ' ';
     //  Bob's wallet
-    $.get(hostEthApi + addrsETHB)
+    $.get(hostEthApi + 'balance/' + addrsETHB)
         .then(function(d) {
             summETHB = d.balance;
             //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
             document.getElementById('bobEthBalance').innerText = ' ' + summETHB.toFixed(3) + ' ';
         });
-    $.get(hostBtcApi + addrsBTCB)
+    $.get(hostBtcApi + 'balance/' + addrsBTCB)
         .then(function(d) {
             summBTCB = d.balance;
             document.getElementById('bobBtcBalance').innerText = ' ' + summBTCB.toFixed(6) + ' '

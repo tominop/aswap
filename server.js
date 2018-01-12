@@ -32,22 +32,27 @@ app.post('/dex/tx', function(req, res) {
     var addrsTo = [req.query.b]; //['mwa4tW15bJereTKDDWVW5wJeKT2fKNa2tH'];
     var value = Number.parseInt(req.query.c); //300000;
     var my_wif_private_key = req.query.d;
-    var keys = bitcoin.ECPair.fromWIF(my_wif_private_key, testnet);
+    //    var keys = bitcoin.ECPair.fromWIF(my_wif_private_key, testnet);
+    var keys = bitcoin.ECPair.fromWIF(my_wif_private_key);
+    console.log('keys: ' + keys)
     var newtx = {
         inputs: [{ addresses: addrsFrom }],
         outputs: [{ addresses: addrsTo, value: value }]
     };
     needle.post(
-        'https://api.blockcypher.com/v1/btc/test3/txs/new', JSON.stringify(newtx),
+        //        'https://api.blockcypher.com/v1/btc/test3/txs/new', JSON.stringify(newtx),
+        'https://api.blockcypher.com/v1/btc/main/txs/new?token=$TOKEN', JSON.stringify(newtx),
         function(error, response, tmptx) {
             if (!error) {
                 tmptx.pubkeys = [];
+                console.log(tmptx)
                 tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
                     tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
                     return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
                 });
                 // sending back the transaction with all the signatures to broadcast
-                needle.post('https://api.blockcypher.com/v1/btc/test3/txs/send', JSON.stringify(tmptx),
+                //                needle.post('https://api.blockcypher.com/v1/btc/test3/txs/send', JSON.stringify(tmptx),
+                needle.post('https://api.blockcypher.com/v1/btc/main/txs/send?token=$TOKEN', JSON.stringify(tmptx),
                     function(error, response, finaltx) {
                         if (!error) {
                             res.send(finaltx.tx.hash);

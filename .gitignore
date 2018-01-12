@@ -8,3 +8,4 @@ public/js/accounts.js
 public/include
 .gitignore.*
 .vscode
+dex.code-workspace
