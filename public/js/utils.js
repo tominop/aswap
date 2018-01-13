@@ -1,18 +1,25 @@
 var hostBtcApi = 'http://localhost:8100/btc/'; //  main net
 //var hostBtcApi = 'http://localhost:8103/btc3/';    // testnet3
 var hostEthApi = 'http://localhost:8200/eth/';
+var isEthApi = false
 var hostLimeApi = 'http://localhost:8201/lime/';
-//  Show wallets function
 
+//  Init ETH API function
 function initApi() {
     $.get(hostEthApi + 'api/' + tokenEthApi)
         .then(function(d) {
-            console.log('ETH API enabled on host: ' + d.host);
+            isEthApi = true
+            console.log('ETH API enabled on host: ' + d.host);})
             //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
             // document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
-        });
+        .fail(function(err) {
+            isEthApi = false
+            if (err.status == 0) console.log('!!!ETH API Microservice not runs')
+            else console.log('!!!ETH API NOT aviabled!!! Microservice says: ' + err.responseText)
+        })
 }
 
+//  Show wallets function
 function showWallets() {
     //  Alice's wallet
     document.getElementById('aliceEth').innerText = ' ' + addrsETHA + ' ';
@@ -29,18 +36,23 @@ function showWallets() {
 //  ShowBalanses function
 function showBalances() {
     //  Alice's wallet
-    $.get(hostEthApi + 'balance/' + addrsETHA)
-        .then(function(d) {
-            summETHA = d.balance;
-            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
-            document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
-        });
+ //   alice.balanceEth();
+ //   bob.balanceEth();
+ if (!isEthApi) {
+        var timeOut = setTimeout(function() {
+        showMess('Init ETH API error!')
+        }, 3000)
+    }        
+ if (isEthApi) {
+        balanceEth('alice', addrsETHA)
+        balanceEth('bob', addrsETHB)
+    }
     $.get(hostBtcApi + 'balance/' + addrsBTCA)
         .then(function(d) {
             summBTCA = d.balance;
             document.getElementById('aliceBtcBalance').innerText = ' ' + summBTCA.toFixed(6) + ' '
         });
-    summLIMEA = tokenContract.balanceOf(addrsETHA) / 10 ** 9;
+//    summLIMEA = tokenContract.balanceOf(addrsETHA) / 10 ** 9;
     document.getElementById('aliceLimeBalance').innerText = ' ' + summLIMEA.toFixed(3) + ' ';
     //  Bob's wallet
     $.get(hostEthApi + 'balance/' + addrsETHB)
@@ -54,10 +66,23 @@ function showBalances() {
             summBTCB = d.balance;
             document.getElementById('bobBtcBalance').innerText = ' ' + summBTCB.toFixed(6) + ' '
         });
-    summLIMEB = tokenContract.balanceOf(addrsETHB) / 10 ** 9;
+//    summLIMEB = tokenContract.balanceOf(addrsETHB) / 10 ** 9;
     document.getElementById('bobLimeBalance').innerText = ' ' + summLIMEB.toFixed(3) + ' ';
-    summLIMEP = tokenContract.balanceOf(addrsETHP) / 10 ** 9;
+//    summLIMEP = tokenContract.balanceOf(addrsETHP) / 10 ** 9;
     document.getElementById('plasmaLimeBalance').innerText = ' ' + summLIMEP.toFixed(3) + ' ';
+}
+
+function balanceEth(user, addrsETH) {
+    console.log(user + '  ' + addrsETH)            
+    $.get(hostEthApi + 'balance/' + addrsETH)
+    .then(function(d) {
+        summETH = d.balance;
+        document.getElementById(user + 'EthBalance').innerText = ' ' + summETH.toFixed(3) + ' ';
+    })
+    .fail(function(err) {
+        document.getElementById(user + 'EthBalance').innerText = ' NaN ';
+        console.log(err.status + err.responseText)            
+    })
 }
 
 function showPrices() {

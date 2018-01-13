@@ -1,14 +1,15 @@
 {
-  "name": "ptb",
-  "version": "1.0.1",
-  "description": "Exchange trading tools",
+  "name": "dex",
+  "version": "1.2.0",
+  "description": "Decentralised Exchange Test",
   "main": "server.js",
   "scripts": {
-    "test": "ptb_test"
+    "test": "",
+    "start": "node server"
   },
   "repository": {
     "type": "git",
-    "url": "ptb"
+    "url": "2tominop\\dex"
   },
   "keywords": [
     "Exchange",

@@ -300,6 +300,18 @@
     //  Ethereum functions
 
     function makeEthTX(accountFrom, privateKey, accountTo, summ) {
+        const newTx = {
+            accountFrom: accountFrom,
+            accountTo: accountTo,
+            value: summ
+        }
+        $.get(hostEthApi + '/' + newTx)
+        .then(function(d) {
+            summETHA = d.balance;
+            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
+            document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
+        });
+
         var countTx = Eth3.eth.getTransactionCount(accountFrom);
         var value = Eth3.toHex(summ * 10 ** 18);
         var txParams = {
