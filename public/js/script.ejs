@@ -1,15 +1,18 @@
 <script type="text/javascript">
     //  Initial values
     var valueBTC = valueETH = valueLIME = 0;
-    var summBTCA = summETHA = summLIMEA = 0;
-    var summBTCB = summETHB = summLIMEB = 0;
+//    var summBTCA = summETHA = summLIMEA = 0; 
+    alice = [0,0,0]
+    var summBTCB = summETHB = summLIMEB = 0; //bob = alice
+    
     var summBTCP = summETHP = summLIMEP = 0;
     var ethPriceBTC = ethPriceUSD = limePrice = 0;
     var nStr = stepN = orderID = 0;
     var timeNow = "";
-    var value0 = Lime3.toHex(0);
-    var gasLimit = Lime3.toHex(4700000);
-    var gasPrice = Lime3.toHex(25000000000);
+    var value0 = 0;
+    var gasLimit = 4700000;
+//    var gasPrice = Lime3.toHex(25000000000);
+    var gasPrice = 0;
 
     function nextStep() {
         stepN = stepN + 1;
@@ -69,7 +72,7 @@
         }
     };
 
-    //  Limex functions
+    //  Lime functions  
 
     function startDEx() {
         orderID = 0;
