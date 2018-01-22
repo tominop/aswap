@@ -2,17 +2,17 @@
     //  Initial values
     var valueBTC = valueETH = valueLIME = 0;
 //    var summBTCA = summETHA = summLIMEA = 0; 
-    alice = [0,0,0]
-    var summBTCB = summETHB = summLIMEB = 0; //bob = alice
-    
+    alice = {
+        addrsE: "0x",
+        summ: [0,0,0]
+    }
+    bob = alice
+    var summBTCA = summETHA = summLIMEA = 0;
+    var summBTCB = summETHB = summLIMEB = 0;
     var summBTCP = summETHP = summLIMEP = 0;
     var ethPriceBTC = ethPriceUSD = limePrice = 0;
     var nStr = stepN = orderID = 0;
     var timeNow = "";
-    var value0 = 0;
-    var gasLimit = 4700000;
-//    var gasPrice = Lime3.toHex(25000000000);
-    var gasPrice = 0;
 
     function nextStep() {
         stepN = stepN + 1;
