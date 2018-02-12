@@ -6,6 +6,6 @@ github
 public/arh
 public/js/accounts.js
 public/include
+keystore
 .gitignore.*
 .vscode
-dex.code-workspace

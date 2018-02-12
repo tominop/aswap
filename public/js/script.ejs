@@ -1,15 +1,18 @@
 <script type="text/javascript">
     //  Initial values
     var valueBTC = valueETH = valueLIME = 0;
+//    var summBTCA = summETHA = summLIMEA = 0; 
+    alice = {
+        addrsE: "0x",
+        summ: [0,0,0]
+    }
+    bob = alice
     var summBTCA = summETHA = summLIMEA = 0;
     var summBTCB = summETHB = summLIMEB = 0;
     var summBTCP = summETHP = summLIMEP = 0;
     var ethPriceBTC = ethPriceUSD = limePrice = 0;
     var nStr = stepN = orderID = 0;
     var timeNow = "";
-    var value0 = Lime3.toHex(0);
-    var gasLimit = Lime3.toHex(4700000);
-    var gasPrice = Lime3.toHex(25000000000);
 
     function nextStep() {
         stepN = stepN + 1;
@@ -69,7 +72,7 @@
         }
     };
 
-    //  Limex functions
+    //  Lime functions  
 
     function startDEx() {
         orderID = 0;
@@ -300,6 +303,18 @@
     //  Ethereum functions
 
     function makeEthTX(accountFrom, privateKey, accountTo, summ) {
+        const newTx = {
+            accountFrom: accountFrom,
+            accountTo: accountTo,
+            value: summ
+        }
+        $.get(hostEthApi + '/' + newTx)
+        .then(function(d) {
+            summETHA = d.balance;
+            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
+            document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
+        });
+
         var countTx = Eth3.eth.getTransactionCount(accountFrom);
         var value = Eth3.toHex(summ * 10 ** 18);
         var txParams = {

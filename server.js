@@ -1,7 +1,6 @@
 // ==================================================
 var express = require('express');
 var app = express();
-var exec = require('child_process').exec;
 var fs = require('fs');
 var bitcoin = require("bitcoinjs-lib");
 var bigi = require("bigi");
