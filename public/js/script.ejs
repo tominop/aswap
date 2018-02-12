@@ -1,16 +1,16 @@
 <script type="text/javascript">
     //  Initial values
-    var valueBTC = valueETH = valueLIME = 0;
-//    var summBTCA = summETHA = summLIMEA = 0; 
+    var valueBTC = valueETH = valueYODA = 0;
+//    var summBTCA = summETHA = summYODAA = 0; 
     alice = {
         addrsE: "0x",
         summ: [0,0,0]
     }
     bob = alice
-    var summBTCA = summETHA = summLIMEA = 0;
-    var summBTCB = summETHB = summLIMEB = 0;
-    var summBTCP = summETHP = summLIMEP = 0;
-    var ethPriceBTC = ethPriceUSD = limePrice = 0;
+    var summBTCA = summETHA = summYODAA = 0;
+    var summBTCB = summETHB = summYODAB = 0;
+    var summBTCP = summETHP = summYODAP = 0;
+    var ethPriceBTC = ethPriceUSD = YODAPrice = 0;
     var nStr = stepN = orderID = 0;
     var timeNow = "";
 
@@ -24,17 +24,17 @@
             startDEx();
         } else if (stepN == 2) {
             var ff = semafor(1, 0, 0);
-            showMess('Alice makes pledge Tx in Limes');
-            var tx = makeLimeTX(addrsETHA, ethPrivateKeyA, addrsETHP, valueLIME);
+            showMess('Alice makes pledge Tx in YODAs');
+            var tx = makeYODATX(addrsETHA, ethPrivateKeyA, addrsETHP, valueYODA);
             var ff = semafor(0, 0, 1);
-            showMess("Plasmoid sends Alice's Tx to Limex");
+            showMess("Plasmoid sends Alice's Tx to YODAx");
             sendTx(addrsETHA, addrsETHP, tx);
         } else if (stepN == 3) {
             var ff = semafor(0, 1, 0);
-            showMess('Bob makes pledge Tx in Limes');
-            var tx = makeLimeTX(addrsETHB, ethPrivateKeyB, addrsETHP, valueLIME);
+            showMess('Bob makes pledge Tx in YODAs');
+            var tx = makeYODATX(addrsETHB, ethPrivateKeyB, addrsETHP, valueYODA);
             var ff = semafor(0, 0, 1);
-            showMess("Plasmoid sends Bob's Tx to Limex");
+            showMess("Plasmoid sends Bob's Tx to YODAx");
             sendTx(addrsETHB, addrsETHP, tx);
         } else if (stepN == 4) {
             showBalances();
@@ -53,14 +53,14 @@
             var ff = semafor(0, 0, 1);
             showBalances();
             showMess('Atomic swap is finished. Plasmoid makes Tx to cancel pledges');
-            var tx = makeLimeTX(addrsETHP, ethPrivateKeyP, addrsETHA, valueLIME);
-            showMess('Plasmoid sends ' + valueLIME.toFixed(3) + ' LIMEs to Alice');
+            var tx = makeYODATX(addrsETHP, ethPrivateKeyP, addrsETHA, valueYODA);
+            showMess('Plasmoid sends ' + valueYODA.toFixed(3) + ' YODAs to Alice');
             document.getElementById('bobStatus').innerText = "Bob received " + valueBTC.toFixed(6) + " BTC";
             sendTx(addrsETHP, addrsETHA, tx);
         } else if (stepN == 8) {
             showMess("Plasmoid makes Tx to cancel Bobs pledge");
-            var tx = makeLimeTX(addrsETHP, ethPrivateKeyP, addrsETHB, valueLIME);
-            showMess('Plasmoid sends ' + valueLIME.toFixed(3) + ' LIMEs to Bob');
+            var tx = makeYODATX(addrsETHP, ethPrivateKeyP, addrsETHB, valueYODA);
+            showMess('Plasmoid sends ' + valueYODA.toFixed(3) + ' YODAs to Bob');
             sendTx(addrsETHP, addrsETHB, tx);
         } else if (stepN == 9) {
             showMess('Smart contract DEx: outDepo in progress');
@@ -72,11 +72,11 @@
         }
     };
 
-    //  Lime functions  
+    //  YODA functions  
 
     function startDEx() {
         orderID = 0;
-        //        blockN = Lime3.eth.blockNumber;
+        //        blockN = YODA3.eth.blockNumber;
         var filter = DExContract.StartDEx({
                 maker: addrsETHA
             }
@@ -90,7 +90,7 @@
             if (!err) {
                 showMess('Smart contract DEx: startDEx Tx is successful');
                 filter.stopWatching();
-                console.log('order=' + event.args._order + ' from ' + event.args.maker + ' to ' + event.args.taker + ' via: ' + event.args.plasmoid + ' eth: ' + event.args.ethAmount / 10 ** 18 + ' btc: ' + event.args.btcAmount / 10 ** 8 + ' pledge (L): ' + event.args.pledgeLIMEAmount / 10 ** 9);
+                console.log('order=' + event.args._order + ' from ' + event.args.maker + ' to ' + event.args.taker + ' via: ' + event.args.plasmoid + ' eth: ' + event.args.ethAmount / 10 ** 18 + ' btc: ' + event.args.btcAmount / 10 ** 8 + ' pledge (L): ' + event.args.pledgeYODAAmount / 10 ** 9);
                 orderID = event.args._order;
                 nextStep();
             } else {
@@ -100,9 +100,9 @@
         showMess('Smart contract DEx: form and send startDEx Tx');
         var accountFrom = addrsETHB;
         var privateKey = ethPrivateKeyB;
-        var myCallData = DExContract.openDEx.getData(addrsETHA, addrsETHP, valueETH * 10 ** 18, valueBTC * 10 ** 8, valueLIME * 10 ** 9); // Data for Ethereum transaction call smart contract DEx
+        var myCallData = DExContract.openDEx.getData(addrsETHA, addrsETHP, valueETH * 10 ** 18, valueBTC * 10 ** 8, valueYODA * 10 ** 9); // Data for Ethereum transaction call smart contract DEx
         var accountTo = DExAddrs;
-        var countTx = Lime3.eth.getTransactionCount(accountFrom);
+        var countTx = YODA3.eth.getTransactionCount(accountFrom);
         var txParams = {
             nonce: countTx,
             gasPrice: gasPrice,
@@ -116,7 +116,7 @@
         var tx = new EthJS.Tx(txParams);
         tx.sign(privateKey);
         var serializedTx = tx.serialize()
-        Lime3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
+        YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
     }
 
     function sendTx(from, to, tx) {
@@ -127,14 +127,14 @@
         });
         filter.watch(function(err, event) {
             if (!err) {
-                showMess('Transfer LIMEs Tx is successful');
+                showMess('Transfer YODAs Tx is successful');
                 filter.stopWatching();
                 nextStep();
             } else {
                 console.log("Error tx " + err)
             };
         });
-        Lime3.eth.sendRawTransaction(tx);
+        YODA3.eth.sendRawTransaction(tx);
     }
 
     function callDExIn() {
@@ -156,7 +156,7 @@
         var privateKey = ethPrivateKeyP;
         var myCallData = DExContract.inDepo.getData(orderID); // Data for Ethereum transaction call smart contract DEx
         var accountTo = DExAddrs;
-        var countTx = Lime3.eth.getTransactionCount(accountFrom);
+        var countTx = YODA3.eth.getTransactionCount(accountFrom);
         var txParams = {
             nonce: countTx,
             gasPrice: gasPrice,
@@ -170,7 +170,7 @@
         var tx = new EthJS.Tx(txParams);
         tx.sign(privateKey);
         var serializedTx = tx.serialize()
-        Lime3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
+        YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
     }
 
     function callDExOut() {
@@ -192,7 +192,7 @@
         var privateKey = ethPrivateKeyP;
         var myCallData = DExContract.outDepo.getData(orderID, addrsETHP);
         var accountTo = DExAddrs;
-        var countTx = Lime3.eth.getTransactionCount(accountFrom);
+        var countTx = YODA3.eth.getTransactionCount(accountFrom);
         var txParams = {
             nonce: countTx,
             gasPrice: gasPrice,
@@ -206,12 +206,12 @@
         var tx = new EthJS.Tx(txParams);
         tx.sign(privateKey);
         var serializedTx = tx.serialize()
-        Lime3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
+        YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
     }
 
-    function makeLimeTX(accountFrom, privateKey, spender, summ) {
+    function makeYODATX(accountFrom, privateKey, spender, summ) {
         var accountTo = tokenAddrs;
-        var countTx = Lime3.eth.getTransactionCount(accountFrom);
+        var countTx = YODA3.eth.getTransactionCount(accountFrom);
         var tokenBalance = tokenContract.balanceOf(accountFrom) / 10 ** 9;
         var myCallData = tokenContract.transfer.getData(spender, summ * 10 ** 9);
         var txParams = {
