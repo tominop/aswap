@@ -8,7 +8,7 @@
  const express = require("express")
  const app = express()
  const axios = require('axios') //  AXIOS - compact lib for HttpRequest
- const urlEth = 'http://188.225.18.174:8080/' //  JSON-RPC server Youdex node
+ const urlEth = 'http://10.20.40.5:8080/' //  JSON-RPC server Youdex node
  var Web3 = require("web3")
  var YODA3 = tokenContract = dexContract = '' //  init variables
  var gasPrice = 0
@@ -16,9 +16,9 @@
 
  var YODA = require("./token") // address and ABI of YODA smart contract in Youdex
  var dex = require("./contract") // address and ABI of DEX smart contract in Youdex
- var alice = require("../keystore/alice") //  address and private key in Ethereum (Youdex) and Bitcoin;
- var bob = require("../keystore/bob") //  address and private key in Ethereum (Youdex) and Bitcoin;
- var plasmoid = require("../keystore/plasmoid") //  address and private key in Ethereum (Youdex);
+ var alice = require("../../private/keystore/alice") //  address and private key in Ethereum (Youdex) and Bitcoin;
+ var bob = require("../../private/keystore/bob") //  address and private key in Ethereum (Youdex) and Bitcoin;
+ var plasmoid = require("../../private/keystore/plasmoid") //  address and private key in Ethereum (Youdex);
 
 
  //  Route - check connect to API provider
