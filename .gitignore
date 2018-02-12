@@ -6,6 +6,7 @@ github
 public/arh
 public/js/accounts.js
 public/include
+private
 keystore
 .gitignore.*
 .vscode
