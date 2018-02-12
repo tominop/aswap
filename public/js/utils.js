@@ -1,8 +1,8 @@
 //var hostBtcApi = 'http://localhost:8100/btc/'; //  main net
 var hostBtcApi = 'http://localhost:8103/btc3/' // testnet3
 var hostEthApi = 'http://localhost:8200/eth/'
-var isEthApi = isBtcApi = isLmxApi = false
-var hostLmxApi = 'http://localhost:8201/lmx/'
+var isEthApi = isBtcApi = isYODAApi = false
+var hostYODAApi = 'http://localhost:8201/YODA/'
 
 //  Init ETH API function
 function initApi() {
@@ -41,24 +41,24 @@ function initApi() {
             if (err.status == 0) console.log('!!!BTC API Microservice not runs')
             else console.log('!!!BTC API NOT enabled!!! Microservice says: ' + err.responseText)
         })
-    $.get(hostLmxApi + 'api/' + tokenAddrs)
+    $.get(hostYODAApi + 'api/' + tokenAddrs)
         .then(function(d) {
             if (!d.error) {
-                isLmxApi = true
+                isYODAApi = true
                 gasPrice = d.gasPrice
-                console.log('LMX API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
+                console.log('YODA API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
             } else {
-                isLmxApi = false
+                isYODAApi = false
                 gasPrice = 0
-                console.log('!!!LMX API NOT enabled. Microservice says: YODAx node not response')
+                console.log('!!!YODA API NOT enabled. Microservice says: YODAx node not response')
                     //            alice[1] = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
                     // document.getElementById('aliceEthBalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
             }
         })
         .fail(function(err) {
-            isLmxApi = false
-            if (err.status == 0) console.log('!!!LMX API Microservice not runs')
-            else console.log('!!!LMX API NOT enabled!!! Microservice says: ' + err.responseText)
+            isYODAApi = false
+            if (err.status == 0) console.log('!!!YODA API Microservice not runs')
+            else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
         })
 }
 
@@ -67,12 +67,12 @@ function showWallets() {
     //  Alice's wallet
     document.getElementById('aliceEth').innerText = ' ' + addrsETHA + ' ';
     document.getElementById('aliceBtc').innerText = ' ' + addrsBTCA + ' ';
-    document.getElementById('aliceLmx').innerText = ' ' + addrsETHA + ' ';
+    document.getElementById('aliceYODA').innerText = ' ' + addrsETHA + ' ';
     //  Bob's wallet
     document.getElementById('bobEth').innerText = ' ' + addrsETHB + ' ';
     document.getElementById('bobBtc').innerText = ' ' + addrsBTCB + ' ';
-    document.getElementById('bobLmx').innerText = ' ' + addrsETHB + ' ';
-    document.getElementById('plasmaLmx').innerText = ' ' + addrsETHP + ' ';
+    document.getElementById('bobYODA').innerText = ' ' + addrsETHB + ' ';
+    document.getElementById('plasmaYODA').innerText = ' ' + addrsETHP + ' ';
 }
 
 
@@ -103,25 +103,25 @@ function showBalances() {
         balanceBtc('alice', addrsBTCA)
         balanceBtc('bob', addrsBTCB)
     }
-    if (!isLmxApi) {
+    if (!isYODAApi) {
         timeOut2 = setTimeout(function() {
-            showMess('Init LMX API error!')
+            showMess('Init YODA API error!')
         }, 3000)
     }
-    if (isLmxApi) {
+    if (isYODAApi) {
         clearTimeout(timeOut2);
-        balanceLmx('alice', addrsETHA)
-        balanceLmx('bob', addrsETHB)
-        balanceLmx('plasma', addrsETHP)
+        balanceYODA('alice', addrsETHA)
+        balanceYODA('bob', addrsETHB)
+        balanceYODA('plasma', addrsETHP)
     }
 
     //    alice[1] = tokenContract.balanceOf(addrsETHA) / 10 ** 9;
-    document.getElementById('aliceLmxBalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
+    document.getElementById('aliceYODABalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
     //  Bob's wallet
     //    summYODAB = tokenContract.balanceOf(addrsETHB) / 10 ** 9;
-    document.getElementById('bobLmxBalance').innerText = ' ' + summYODAB.toFixed(3) + ' ';
+    document.getElementById('bobYODABalance').innerText = ' ' + summYODAB.toFixed(3) + ' ';
     //    summYODAP = tokenContract.balanceOf(addrsETHP) / 10 ** 9;
-    document.getElementById('plasmaLmxBalance').innerText = ' ' + summYODAP.toFixed(3) + ' ';
+    document.getElementById('plasmaYODABalance').innerText = ' ' + summYODAP.toFixed(3) + ' ';
 }
 
 function balanceEth(user, addrsETH) {
@@ -150,15 +150,15 @@ function balanceBtc(user, addrsBTC) {
         })
 }
 
-function balanceLmx(user, addrsETH) {
+function balanceYODA(user, addrsETH) {
     console.log(user + '  ' + addrsETH)
-    $.get(hostLmxApi + 'balance/' + addrsETH)
+    $.get(hostYODAApi + 'balance/' + addrsETH)
         .then(function(d) {
             summETH = d.balance;
-            document.getElementById(user + 'LmxBalance').innerText = ' ' + summETH.toFixed(3) + ' ';
+            document.getElementById(user + 'YODABalance').innerText = ' ' + summETH.toFixed(3) + ' ';
         })
         .fail(function(err) {
-            document.getElementById(user + 'LmxBalance').innerText = ' NaN ';
+            document.getElementById(user + 'YODABalance').innerText = ' NaN ';
             console.log(err.status + err.responseText)
         })
 }
@@ -170,13 +170,13 @@ function showPrices() {
             var ethPriceUSD_s = d[0].price_usd;
             ethPriceBTC = parseFloat(ethPriceBTC_s);
             ethPriceUSD = parseFloat(ethPriceUSD_s);
-            lmxPrice = (1.0 / ethPriceUSD).toFixed(6);
-            lmxPrice_s = lmxPrice.toString();
-            document.getElementById('plasmaPrices').innerText = 'ETH/BTC= ' + ethPriceBTC_s + '; ETH/USD= ' + ethPriceUSD_s + '; YODA/ETH= ' + lmxPrice_s + ';';
+            YODAPrice = (1.0 / ethPriceUSD).toFixed(6);
+            YODAPrice_s = YODAPrice.toString();
+            document.getElementById('plasmaPrices').innerText = 'ETH/BTC= ' + ethPriceBTC_s + '; ETH/USD= ' + ethPriceUSD_s + '; YODA/ETH= ' + YODAPrice_s + ';';
             valueBTC = alice[0];
             document.getElementById('summBTCA').value = valueBTC.toFixed(6);
             valueETH = valueBTC / ethPriceBTC;
-            valueYODA = valueETH / lmxPrice;
+            valueYODA = valueETH / YODAPrice;
             document.getElementById('summETHA').value = valueETH.toFixed(3);
             document.getElementById('summYODAA').value = valueYODA.toFixed(3);
         });
@@ -193,7 +193,7 @@ function showMess(s) {
 function calcEth() {
     valueBTC = document.getElementById('summBTCA').value;
     valueETH = valueBTC / ethPriceBTC;
-    valueYODA = valueETH / lmxPrice;
+    valueYODA = valueETH / YODAPrice;
     document.getElementById('summETHA').value = valueETH.toFixed(3);
     document.getElementById('summYODAA').value = valueYODA.toFixed(3);
 }
@@ -201,7 +201,7 @@ function calcEth() {
 function calcBtc() {
     valueETH = document.getElementById('summETHA').value;
     valueBTC = valueETH * ethPriceBTC;
-    valueYODA = valueETH / lmxPrice;
+    valueYODA = valueETH / YODAPrice;
     document.getElementById('summBTCA').value = valueBTC.toFixed(6);
     document.getElementById('summYODAA').value = valueYODA.toFixed(3);
 }
