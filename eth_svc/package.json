@@ -1,7 +1,7 @@
 {
     "name": "eth_svc",
-    "version": "1.0.1",
-    "description": "eth_api microservices",
+    "version": "1.0.2",
+    "description": "eth_api microservice",
     "main": "service.js",
     "scripts": {
         "test": "echo \\\\\\\"Error: no test specified\\\\\\\" && exit 1",
