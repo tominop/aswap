@@ -8,7 +8,7 @@
  const express = require("express"),
      app = express(),
      axios = require('axios'), //  AXIOS - compact lib for HttpRequest
-     urlYoudex = 'http://10.20.40.5:8080/' //  JSON-RPC server Youdex node
+     urlYoudex = 'http://10.20.40.5:8080/'; //  JSON-RPC server Youdex node
 
  var Web3 = require("web3"),
      EthJS = require("ethereumjs-tx"),
@@ -19,13 +19,13 @@
      dex = require("./contract"), // address and ABI of DEX smart contract in Youdex
      alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
      bob = require("../../private/keystore/bob"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-     plasmoid = require("../../private/keystore/plasmoid") //  address and private key in Ethereum (Youdex);
+     plasmoid = require("../../private/keystore/plasmoid"); //  address and private key in Ethereum (Youdex);
 
 
  //  Route - check connect to API provider
  app.get("/YODA/api/", (req, res) => {
      YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex))
-     tokenContract = YODA3.eth.contract(YODA.abi).at(YODA.adrress) // YODA token smart contract in YODAx
+     tokenContract = YODA3.eth.contract(YODA.abi).at(YODA.address) // YODA token smart contract in YODAx
      DExContract = YODA3.eth.contract(dex.abi).at(dex.address) //  Dex smart contract in Youdex
      YODA3.eth.getGasPrice(function(error, result) { //  calculate gas price
          if (!error) {
@@ -53,25 +53,7 @@
      const data = JSON.parse(req.params.data),
          valueA = data.valueA, //  value of Alice's coins
          valueB = data.valueB, //  value of Bob's coins
-         valueY = data.valueY //  value of YODA tokens for pledge
-     console.log('A ' + valueA + ' B ' + valueB + ' Y ' + valueY)
-         /*        var myCallData = dexContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, req.params.data.valueA, req.params.data.valueB, req.params.data.valueL)  // Data for Ethereum transaction DEx smart contract exec
-                 var countTx = YODA3.eth.getTransactionCount(accountFrom)    //  get count of TX for nonce
-                 var txParams = {        //  new Tx params 
-                     nonce: countTx,
-                     gasPrice: gasPrice,
-                     gasLimit: gasLimit,
-                     to: dex.address,
-                     value: 0,
-                     data: myCallData,
-                     chainId: 1337       // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-                 }
-                 var tx = new EthJS.Tx(txParams)
-                 tx.sign(privateKey.B)            // sign Tx with Bob's private key for YODAx account
-                 var serializedTx = tx.serialize()
-                 YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'))    //  send Tx in YODAx */
-         //     res.header("Access-Control-Allow-Origin", "*")
-         //     res.json({ balance: data }) //  
+         valueY = data.valueY;//  value of YODA tokens for pledge
      orderID = 0;
      var filter = DExContract.StartDEx({
          maker: alice.ethAddrs
@@ -80,44 +62,111 @@
      filter.watch(function(err, event) {
          if (!err) {
              filter.stopWatching();
-             orderID = event.args._order;
-             res.header("Access-Control-Allow-Origin", "*")
+             res.header("Access-Control-Allow-Origin", "*");
              res.json({
-                 id: 1,
+                 id: event.args._order,
                  maker: event.args.maker,
                  taker: event.args.taker,
                  plasmoid: event.args.plasmoid,
                  ethAmount: event.args.ethAmount,
                  btcAmount: event.args.btcAmount,
-                 pledgeYODAAmount: event.args.pledgeYODAAmount
+                 pledgeYODAAmount: event.args.pledgeYODAamount
              })
          } else {
              console.log("Error " + err)
              var err = new Error(err)
              err.status = 501
+             res.header("Access-Control-Allow-Origin", "*");
              res.send(err)
          };
      });
-     var myCallData = DExContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, valueB * 10 ** 18, valueA * 10 ** 8, valueY * 10 ** 9), // Data for Ethereum transaction call smart contract DEx
-         countTx = YODA3.eth.getTransactionCount(bob.ethAddrs),
-         txParams = {
+     var myCallData = DExContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, valueB * 10 ** 18, valueA * 10 ** 8, valueY * 10 ** 9);
+     var countTx = YODA3.eth.getTransactionCount(bob.ethAddrs);
+     var txParams = {
              nonce: YODA3.toHex(countTx),
              gasPrice: YODA3.toHex(gasPrice),
              gasLimit: YODA3.toHex(gasLimit),
              to: dex.address,
-             value: YODA3.toHex(0),
-             data: myCallData,
+             value: '0x0',
+             data: myCallData
              // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-             chainId: 1337
+            // chainId: YODA3.toHex(1337)
          };
-     console.log(txParams.nonce + ' ' + txParams.gasPrice + ' ' + txParams.gasLimit + ' ' + txParams.to + ' ' + txParams.value + ' ' + txParams.data)
+     console.log(txParams.nonce + ' ' + txParams.gasPrice + ' ' + txParams.gasLimit + ' ' + txParams.to + ' ' + txParams.value + ' ' + txParams.data);
      var tx = new EthJS(txParams);
      console.log('tx success bob_key ' + bob.ethKey);
-     const privateKey = Buffer.from(bob.ethKey, 'hex')
+     const privateKey = new Buffer(bob.ethKey, 'hex');
      tx.sign(privateKey);
-     var serializedTx = tx.serialize()
-     YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
+     var serializedTx = tx.serialize();
+     YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
+        if (!err) console.log("Tx hash " + hash); 
+        else {
+            console.log(err)
+//            var err = new Error(err)
+            err.status = 501
+            res.header("Access-Control-Allow-Origin", "*");
+            res.send(err)
+        };         
+     });
  })
+
+ //  Route - makeTX function 
+ app.get("/YODA/makeTX/:data", (req, res) => {
+    const data = JSON.parse(req.params.data),
+        from = eval(data.from).ethAddrs,
+        to = eval(data.to).ethAddrs,
+        valueY = data.valueY;
+    var filter = tokenContract.Transfer({
+        from: from,
+        to: to
+    }),
+    hashTx = "";
+    filter.watch(function(err, event) {
+        if (!err) {
+            filter.stopWatching();
+            res.header("Access-Control-Allow-Origin", "*");
+            res.json({hash: hashTx})
+        } else {
+            console.log("Error " + err)
+            var err = new Error(err)
+            err.status = 501
+            res.header("Access-Control-Allow-Origin", "*");
+            res.send(err)
+        };
+    });
+    var myCallData = tokenContract.transfer.getData(to, valueY * 10 ** 9);
+    var countTx = YODA3.eth.getTransactionCount(from);
+    var txParams = {
+            nonce: YODA3.toHex(countTx),
+            gasPrice: YODA3.toHex(gasPrice),
+            gasLimit: YODA3.toHex(gasLimit),
+            to: YODA.address,
+            value: '0x0',
+            data: myCallData
+            // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
+           // chainId: YODA3.toHex(1337)
+        };
+    console.log(txParams.nonce + ' ' + txParams.gasPrice + ' ' + txParams.gasLimit + ' ' + txParams.to + ' ' + txParams.value + ' ' + txParams.data);
+    var tx = new EthJS(txParams);
+    console.log('tx success key ' + eval(data.from).ethKey);
+    const privateKey = new Buffer(eval(data.from).ethKey, 'hex');
+    tx.sign(privateKey);
+    var serializedTx = tx.serialize();
+    YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
+       if (!err) {
+            hashTx = hash;
+            console.log("Tx hash " + hash); 
+       }
+       else {
+           console.log(err)
+//            var err = new Error(err)
+           err.status = 501
+           res.header("Access-Control-Allow-Origin", "*");
+           res.send(err)
+       };         
+    });
+})
+
 
  const port = process.env.PORT_YODA || 8201
 

@@ -8,8 +8,10 @@
  const express = require("express"),
      app = express(),
      axios = require('axios'),
-     urlEth = 'https://rinkeby.infura.io/',
-     token = 'Yqt5FtYMQRGrpp6GSnVe'
+     urlEth = 'http://10.20.40.5:8080/',
+     token = ''
+//     urlEth = 'https://rinkeby.infura.io/',
+//     token = 'Yqt5FtYMQRGrpp6GSnVe'
  var Web3 = require("web3"),
      Eth3 = '',
      alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
