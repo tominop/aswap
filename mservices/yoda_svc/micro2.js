@@ -11,7 +11,6 @@
      urlYoudex = 'http://10.20.40.5:8080/' //  JSON-RPC server Youdex node
 
  var Web3 = require("web3"),
-     EthJS = require("ethereumjs-tx"),
      YODA3 = tokenContract = dexContract = '', //  init variables
      gasPrice = 0,
      gasLimit = 4700000,
@@ -26,7 +25,7 @@
  app.get("/YODA/api/", (req, res) => {
      YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex))
      tokenContract = YODA3.eth.contract(YODA.abi).at(YODA.adrress) // YODA token smart contract in YODAx
-     DExContract = YODA3.eth.contract(dex.abi).at(dex.address) //  Dex smart contract in Youdex
+     dExContract = YODA3.eth.contract(dex.abi).at(dex.address) //  Dex smart contract in Youdex
      YODA3.eth.getGasPrice(function(error, result) { //  calculate gas price
          if (!error) {
              gasPrice = result
@@ -53,8 +52,8 @@
      const data = JSON.parse(req.params.data),
          valueA = data.valueA, //  value of Alice's coins
          valueB = data.valueB, //  value of Bob's coins
-         valueY = data.valueY //  value of YODA tokens for pledge
-     console.log('A ' + valueA + ' B ' + valueB + ' Y ' + valueY)
+         valueY = data.valueY, //  value of YODA tokens for pledge
+         console.log('A ' + valueA + ' B ' + valueB + ' Y ' + valueY)
          /*        var myCallData = dexContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, req.params.data.valueA, req.params.data.valueB, req.params.data.valueL)  // Data for Ethereum transaction DEx smart contract exec
                  var countTx = YODA3.eth.getTransactionCount(accountFrom)    //  get count of TX for nonce
                  var txParams = {        //  new Tx params 
@@ -82,41 +81,35 @@
              filter.stopWatching();
              orderID = event.args._order;
              res.header("Access-Control-Allow-Origin", "*")
-             res.json({
-                 id: 1,
-                 maker: event.args.maker,
-                 taker: event.args.taker,
-                 plasmoid: event.args.plasmoid,
-                 ethAmount: event.args.ethAmount,
-                 btcAmount: event.args.btcAmount,
-                 pledgeYODAAmount: event.args.pledgeYODAAmount
-             })
+             res.json({ id: 1, })
          } else {
              console.log("Error " + err)
-             var err = new Error(err)
-             err.status = 501
-             res.send(err)
          };
      });
-     var myCallData = DExContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, valueB * 10 ** 18, valueA * 10 ** 8, valueY * 10 ** 9), // Data for Ethereum transaction call smart contract DEx
-         countTx = YODA3.eth.getTransactionCount(bob.ethAddrs),
-         txParams = {
-             nonce: YODA3.toHex(countTx),
-             gasPrice: YODA3.toHex(gasPrice),
-             gasLimit: YODA3.toHex(gasLimit),
-             to: dex.address,
-             value: YODA3.toHex(0),
-             data: myCallData,
-             // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-             chainId: 1337
-         };
-     console.log(txParams.nonce + ' ' + txParams.gasPrice + ' ' + txParams.gasLimit + ' ' + txParams.to + ' ' + txParams.value + ' ' + txParams.data)
-     var tx = new EthJS(txParams);
-     console.log('tx success bob_key ' + bob.ethKey);
-     const privateKey = Buffer.from(bob.ethKey, 'hex')
+     res.header("Access-Control-Allow-Origin", "*")
+     res.json({ id: 0 })
+     accountFrom = bob.ethAddrs,
+         privateKey = bob.ethKey,
+         myCallData = DExContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, valueB * 10 ** 18, valueA * 10 ** 8, valueY * 10 ** 9), // Data for Ethereum transaction call smart contract DEx
+         accountTo = dex.address,
+         countTx = YODA3.eth.getTransactionCount(accountFrom);
+     var txParams = {
+         nonce: countTx,
+         gasPrice: gasPrice,
+         gasLimit: gasLimit,
+         to: accountTo,
+         value: 0,
+         data: myCallData,
+         // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
+         chainId: 1337
+     }
+     var tx = new EthJS.Tx(txParams);
      tx.sign(privateKey);
      var serializedTx = tx.serialize()
      YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
+
+
+
  })
 
  const port = process.env.PORT_YODA || 8201

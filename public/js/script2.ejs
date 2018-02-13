@@ -71,16 +71,19 @@
 
     function startDEx() {
         if (isYODAApi) {
-            showMess('Smart contract DEx: form and send startDEx Tx');
-            var jsonData = JSON.stringify({ valueA: valueBTC, valueB: valueETH, valueY: valueYODA})
+            jsonData = JSON.stringify({ valueA: valueBTC, valueB: valueETH, valueY: valueYODA})
             $.get(hostYODAApi + 'startDEX/' + jsonData)
+                .then(function(d) {
+                    showMess('Smart contract DEx: form and send startDEx Tx');
+                })
                 .then(function(d) {
                     showMess('Smart contract DEx: startDEx Tx is successful');
                     orderID = d.id
                     console.log('order=' + d.id + ' from ' + d.maker + ' to ' + d.taker + ' via: ' + d.plasmoid + ' eth: ' + d.ethAmount / 10 ** 18 + ' btc: ' + d.btcAmount / 10 ** 8 + ' pledge (YODA): ' + d.pledgeYODAAmount / 10 ** 9);
-     //         nextStep();
+              nextStep();
                 })
                 .fail(function(err) {
+                    document.getElementById(user + 'EthBalance').innerText = ' NaN ';
                     console.log(err.status + err.responseText)
                 })
 

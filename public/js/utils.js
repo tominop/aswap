@@ -9,7 +9,7 @@ var isEthApi = isBtcApi = isYODAApi = false,
     btcFee = 0
 
 
-//  Init ETH API function
+//  Init APIs function
 function initApi() {
     $.get(hostEthApi + 'api/')
         .then(function(d) {
@@ -54,8 +54,6 @@ function initApi() {
                 isYODAApi = false
                 gasPrice = 0
                 console.log('!!!YODA API NOT enabled. Microservice says: YODAx node not response')
-                    //            alice[1] = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
-                    // document.getElementById('aliceEthBalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
             }
         })
         .fail(function(err) {
@@ -65,26 +63,9 @@ function initApi() {
         })
 }
 
-//  Show wallets function
-function showWallets() {
-    //  Alice's wallet
-    // document.getElementById('aliceEth').innerText = ' ' + addrsETHA + ' ';
-    //document.getElementById('aliceBtc').innerText = ' ' + addrsBTCA + ' ';
-    //document.getElementById('aliceYODA').innerText = ' ' + addrsETHA + ' ';
-    //  Bob's wallet
-    // document.getElementById('bobEth').innerText = ' ' + addrsETHB + ' ';
-    //document.getElementById('bobBtc').innerText = ' ' + addrsBTCB + ' ';
-    //document.getElementById('bobYODA').innerText = ' ' + addrsETHB + ' ';
-    //document.getElementById('plasmoidYODA').innerText = ' ' + addrsETHP + ' ';
-}
-
-
 //  ShowBalanses function
 function showBalances() {
     var timeOut = timeOut1 = timeOut2 = ""
-        //  Alice's wallet
-        //   alice.balanceEth();
-        //   bob.balanceEth();
     if (!isEthApi) {
         timeOut = setTimeout(function() {
             if (isEthApi) {
@@ -120,7 +101,6 @@ function showBalances() {
         balanceYODA('bob')
         balanceYODA('plasmoid')
     }
-
 }
 
 function balanceEth(user) {
@@ -221,12 +201,14 @@ function calcBtc() {
 }
 
 function placeOrder() {
-    nStr = 0;
+    var err = false,
+        errStr = '';
+    nStr = 0; //  Init log string number 
     valueBTC = parseFloat(document.getElementById('summBTCA').value);
     valueETH = parseFloat(document.getElementById('summETHA').value);
     valueYODA = parseFloat(document.getElementById('summYODAA').value);
-    var err = false;
-    var errStr = '';
+    var err = false,
+        errStr = '';
     showMess("Alice places order: " + valueBTC.toFixed(6) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueYODA.toFixed(3) + "YODA");
     if (valueBTC > summBTCA) {
         errStr = 'Alice has not enough BTC! ';
