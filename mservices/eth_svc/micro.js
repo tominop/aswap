@@ -5,22 +5,22 @@
   * MIT Licensed Copyright(c) 2018-2019
   */
 
- const express = require("express")
- const app = express()
- const axios = require('axios')
- const urlEth = 'https://rinkeby.infura.io/'
- var Web3 = require("web3")
- var Eth3 = ''
+ const express = require("express"),
+     app = express(),
+     axios = require('axios'),
+     urlEth = 'https://rinkeby.infura.io/',
+     token = 'Yqt5FtYMQRGrpp6GSnVe'
+ var Web3 = require("web3"),
+     Eth3 = '',
+     alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
+     bob = require("../../private/keystore/bob") //  address and private key in Ethereum (Youdex) and Bitcoin;
 
- app.get("/eth/api/:token", (req, res) => {
-     const token = req.params.token
+ app.get("/eth/api/", (req, res) => {
      Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token))
-     const provider = Eth3.currentProvider
      Eth3.eth.getGasPrice(function(error, result) {
          if (!error) {
              res.header("Access-Control-Allow-Origin", "*")
-             res.json({ error: false, host: provider.host, gasPrice: result })
-             console.log('p: ' + provider.host + '  gP' + result)
+             res.json({ error: false, host: urlEth, gasPrice: result })
          } else {
              res.header("Access-Control-Allow-Origin", "*")
              res.json({ error: true })
@@ -29,12 +29,11 @@
      })
  })
 
- app.get("/eth/balance/:addrs", (req, res) => {
-     const addrsETH = req.params.addrs
-         //    const balance = Eth3.eth.getBalance(addrsETH) / 10 ** 18
-     const balance = 18
+ app.get("/eth/balance/:name", (req, res) => {
+     const addrs = eval(req.params.name).ethAddrs,
+         balance = Eth3.eth.getBalance(addrs) / 10 ** 18;
      res.header("Access-Control-Allow-Origin", "*")
-     res.json({ balance: balance })
+     res.json({ balance: balance, address: addrs })
  })
 
  const port = process.env.PORT_ETH || 8200

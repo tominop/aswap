@@ -5,35 +5,32 @@
   * MIT Licensed Copyright(c) 2018-2019
   */
 
- const express = require("express")
- const app = express()
- const axios = require('axios') //  AXIOS - compact lib for HttpRequest
- const urlEth = 'http://10.20.40.5:8080/' //  JSON-RPC server Youdex node
- var Web3 = require("web3")
- var YODA3 = tokenContract = dexContract = '' //  init variables
- var gasPrice = 0
- var gasLimit = 4700000
+ const express = require("express"),
+     app = express(),
+     axios = require('axios'), //  AXIOS - compact lib for HttpRequest
+     urlYoudex = 'http://10.20.40.5:8080/' //  JSON-RPC server Youdex node
 
- var YODA = require("./token") // address and ABI of YODA smart contract in Youdex
- var dex = require("./contract") // address and ABI of DEX smart contract in Youdex
- var alice = require("../../private/keystore/alice") //  address and private key in Ethereum (Youdex) and Bitcoin;
- var bob = require("../../private/keystore/bob") //  address and private key in Ethereum (Youdex) and Bitcoin;
- var plasmoid = require("../../private/keystore/plasmoid") //  address and private key in Ethereum (Youdex);
+ var Web3 = require("web3"),
+     YODA3 = tokenContract = dexContract = '', //  init variables
+     gasPrice = 0,
+     gasLimit = 4700000,
+     YODA = require("./token"), // address and ABI of YODA smart contract in Youdex
+     dex = require("./contract"), // address and ABI of DEX smart contract in Youdex
+     alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
+     bob = require("../../private/keystore/bob"), //  address and private key in Ethereum (Youdex) and Bitcoin;
+     plasmoid = require("../../private/keystore/plasmoid") //  address and private key in Ethereum (Youdex);
 
 
  //  Route - check connect to API provider
- app.get("/YODA/api/:token", (req, res) => {
-     YODA3 = new Web3(new Web3.providers.HttpProvider(urlEth))
-     const provider = YODA3.currentProvider
+ app.get("/YODA/api/", (req, res) => {
+     YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex))
      tokenContract = YODA3.eth.contract(YODA.abi).at(YODA.adrress) // YODA token smart contract in YODAx
      dExContract = YODA3.eth.contract(dex.abi).at(dex.address) //  Dex smart contract in Youdex
-     console.log('YODA: ' + YODA.adrress + '  abi: ' + YODA.abi)
      YODA3.eth.getGasPrice(function(error, result) { //  calculate gas price
          if (!error) {
              gasPrice = result
              res.header("Access-Control-Allow-Origin", "*")
-             res.json({ error: false, host: provider.host, gasPrice: result })
-             console.log('p: ' + provider.host + '  gP' + result)
+             res.json({ error: false, host: urlYoudex, gasPrice: result })
          } else {
              res.header("Access-Control-Allow-Origin", "*")
              res.json({ error: true })
@@ -44,9 +41,10 @@
 
  //  Route - check balance of YODA tokens
  app.get("/YODA/balance/:name", (req, res) => {
-     balance = tokenContract.balanceOf(eval(req.params.name).ethAddrs) / 10 ** 9
+     const addrs = eval(req.params.name).ethAddrs,
+         balance = tokenContract.balanceOf(addrs) / 10 ** 9;
      res.header("Access-Control-Allow-Origin", "*")
-     res.json({ balance: balance })
+     res.json({ balance: balance, address: addrs })
  })
 
  //  Route - startDex function 
