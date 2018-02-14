@@ -63,38 +63,35 @@
          inputs: [{ addresses: from }],
          outputs: [{ addresses: to, value: valueB }]
      };
-     axios.post(btcUrl + '/txs/new', JSON.stringify(newtx))
-         // axios.post(btcUrl + '/txs/new', newtx)
+     axios.post(btcUrl + '/txs/new/', JSON.stringify(newtx))
          .then(function(tmptx) {
              tmptx.pubkeys = [];
              console.log(tmptx);
-             //            tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
-             //              tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
-             //            return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
+             tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
+                 tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
+                 return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
+             });
+             // sending back the transaction with all the signatures to broadcast
+             axios.post(btcUrl + '/txs/send', JSON.stringify(tmptx))
+                 .then(function(finaltx) {
+                     res.header("Access-Control-Allow-Origin", "*");
+                     res.json({ hash: finaltx.tx.hash });
+                 })
+                 .catch(function(err) {
+                     console.log(err);
+                     err = new Error('BTC API service dropped Tx');
+                     err.status = 504;
+                     res.header("Access-Control-Allow-Origin", "*");
+                     res.send(err);
+                 })
          })
-         // console.log(tmptx.signatures);
-
-     // sending back the transaction with all the signatures to broadcast
-     /*             axios.post(btcUrl + '/txs/send', JSON.stringify(tmptx))
-                      .then(function(finaltx) {
-                          res.header("Access-Control-Allow-Origin", "*");
-                          res.json({ hash: finaltx.tx.hash });
-                      })
-                      .catch(function(err) {
-                          console.log(err);
-                          err = new Error('BTC API service dropped Tx');
-                          err.status = 504;
-                          res.header("Access-Control-Allow-Origin", "*");
-                          res.send(err);
-                      }) */
-     //        })
-     .catch(function(err) {
-         console.log(err);
-         err = new Error('BTC API service not aviable');
-         err.status = 501;
-         res.header("Access-Control-Allow-Origin", "*");
-         res.send(err);
-     })
+         .catch(function(err) {
+             console.log(err);
+             err = new Error('BTC API service not aviable');
+             err.status = 501;
+             res.header("Access-Control-Allow-Origin", "*");
+             res.send(err);
+         })
  })
 
  //  Route - waitTx function 

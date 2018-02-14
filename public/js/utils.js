@@ -5,7 +5,7 @@
  * MIT Licensed Copyright(c) 2018-2019
  */
 
-var isEthApi = isBtcApi = isYODAApi = false,
+var isEthApi = isBtcApi = isYODAApi = flag = false,
     btcFee = 0
 
 
@@ -111,7 +111,6 @@ function balanceEth(user) {
             document.getElementById(user + 'Eth').innerText = ' ' + addrsETH + ' ';
             document.getElementById(user + 'EthBalance').innerText = summETH.toFixed(3);
             if (user == "bob") summETHB = summETH
-            console.log(user + '  ' + addrsETH + '  ' + summETH)
         })
         .fail(function(err) {
             document.getElementById(user + 'EthBalance').innerText = ' NaN ';
@@ -122,12 +121,13 @@ function balanceEth(user) {
 function balanceBtc(user) {
     $.get(hostBtcApi + 'balance/' + user)
         .then(function(d) {
-            const summBTC = d.balance,
+            const summBTCa = d.balance,
                 addrsBTC = d.address;
             document.getElementById(user + 'Btc').innerText = ' ' + addrsBTC + ' ';
-            document.getElementById(user + 'BtcBalance').innerText = summBTC.toFixed(6);
-            if (user == "alice") showOrder(summBTC);
-            console.log(user + '  ' + addrsBTC + '  ' + summBTC)
+            document.getElementById(user + 'BtcBalance').innerText = summBTCa.toFixed(6);
+            if (user == "alice" && !flag) {
+                showOrder(summBTCa);
+            }
         })
         .fail(function(err) {
             document.getElementById(user + 'BtcBalance').innerText = ' NaN ';
@@ -145,7 +145,6 @@ function balanceYODA(user) {
             if (user == "alice") summYODAA = summETH;
             else if (user == "bob") summYODAB = summETH;
             else if (user == "plasmoid") summYODAP = summETH;
-            console.log(user + '  ' + addrsETH + '  ' + summETH)
         })
         .fail(function(err) {
             document.getElementById(user + 'YODABalance').innerText = ' NaN ';
@@ -174,6 +173,7 @@ function showOrder(paramBTC) {
     valueYODA = valueETH / YODAPrice;
     document.getElementById('summETHA').value = valueETH.toFixed(3);
     document.getElementById('summYODAA').value = valueYODA.toFixed(3);
+    flag = true;
 }
 
 function showMess(s) {
@@ -255,7 +255,7 @@ function semafor(a, b, c) {
     else if (c == 0) document.getElementById('plasmoidLed').style = greenLed;
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > 2 * 1000) {
+        if ((new Date().getTime() - start) > 2 * 100) {
             break;
         }
     }

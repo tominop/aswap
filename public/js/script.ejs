@@ -56,6 +56,7 @@
             callDExOut();
         } else if (stepN == 10) {
             var ff = semafor(0, 0, 0);
+            flaf = false;
             showBalances();
             showMess("Atomic swap BTC/ETH finished successfully!");
         }
@@ -86,7 +87,7 @@
     function makeYODATX(from, to, summ) {
         if (isYODAApi) {
             var jsonData = JSON.stringify({ from: from, to: to, valueY: summ})
-            $.get(hostYODAApi + 'makeTX/' + jsonData)
+            $.get(hostYODAApi + 'tokenTX/' + jsonData)
                 .then(function(d) {
                     showMess("Transfer " + from + "'s" + " YODAs Tx is successful");
                     console.log('hash Tx=' + d.hash);
@@ -102,201 +103,105 @@
  
     }
 
-
     function callDExIn() {
-        return;
-        var filter = DExContract.InDepo({
-            _order: orderID
-        });
-        filter.watch(function(err, event) {
-            if (!err) {
-                showMess('Smart contract DEx: inDepo Tx is successful');
-                filter.stopWatching();
-                console.log('order = ' + event.args._order);
-                nextStep();
-            } else {
-                console.log("Error " + err)
-            };
-        });
-        showMess('Smart contract DEx: form and send inDepo Tx, orderID= ' + orderID);
-        var accountFrom = addrsETHP; //  Test RPC!!!
-        var privateKey = ethPrivateKeyP;
-        var myCallData = DExContract.inDepo.getData(orderID); // Data for Ethereum transaction call smart contract DEx
-        var accountTo = DExAddrs;
-        var countTx = YODA3.eth.getTransactionCount(accountFrom);
-        var txParams = {
-            nonce: countTx,
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-            to: accountTo,
-            value: value0,
-            data: myCallData
-            // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-            //chainId: 1337
-        }
-        var tx = new EthJS.Tx(txParams);
-        tx.sign(privateKey);
-        var serializedTx = tx.serialize()
-        YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
-    }
+        if (isYODAApi) {
+            showMess('Smart contract DEx: form and send inDepo Tx');
+            var jsonData = JSON.stringify({ order: orderID})
+            $.get(hostYODAApi + 'inDepo/' + jsonData)
+                .then(function(d) {
+                    showMess('Smart contract DEx: inDepo Tx is successful');
+                    console.log('order=' + orderID + 'hash Tx=' + d.hash);
+                    $.get(hostYODAApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('Smart contract DEx: inDepo Tx is confirmed');
+                        console.log('in Youdex block N ' + h.block);
+                        nextStep();
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText)
+                        })
+                })
+                .fail(function(err) {
+                    console.log(err.status + err.responseText)
+                })
 
-    function callDExOut() {
-        var filter = DExContract.OutDepo({
-            _order: orderID
-        });
-        filter.watch(function(err, event) {
-            if (!err) {
-                showMess('Smart contract DEx: OutDepo Tx is successful');
-                filter.stopWatching();
-                console.log('order = ' + event.args._order);
-                nextStep();
-            } else {
-                console.log("Error " + err)
-            };
-        });
-        showMess('Smart contract DEx: form and send OutDepo Tx');
-        var accountFrom = addrsETHP;
-        var privateKey = ethPrivateKeyP;
-        var myCallData = DExContract.outDepo.getData(orderID, addrsETHP);
-        var accountTo = DExAddrs;
-        var countTx = YODA3.eth.getTransactionCount(accountFrom);
-        var txParams = {
-            nonce: countTx,
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-            to: accountTo,
-            value: value0,
-            data: myCallData,
-            // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-            chainId: 1337
         }
-        var tx = new EthJS.Tx(txParams);
-        tx.sign(privateKey);
-        var serializedTx = tx.serialize()
-        YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'));
+     else {
+        }
     }
-
 
     //  Atomic swap function
     function atomicSwap() {
-        showMess('Alice send ' + valueBTC.toFixed(6) + 'BTC to Bob Tx to Bitcoin');
-        makeBTCTx(addrsBTCA, wifPrivateKeyA, addrsBTCB, valueBTC * 10 ** 8, function(txHash) {
-            showMess('BTC Tx is successful. Checking Bitcoin confirmation');
-            console.log('BTC Tx hash: ' + txHash);
-            var ff = semafor(3, 0, 1);
-            waitConfirmBtc(txHash);
-            /*            param = '?a=' + txHash //addrsFrom.toString();
-                        $.post('/dex/checkTx' + param).done(function(ls) {
-                            if (ls !== 'error') {
-                                showMess('BTC Tx is confirmed in block ' + ls);
-                                nextStep();
-                            } else {
-                                showMess('Error while BTC confirmation: no Tx mined in 30 min')
-                            };
-                        }).fail(function(xhr) {
-                            showMess(xhr.responseText);
-                        }); */
-        });
-        var tx = makeEthTX(addrsETHB, ethPrivateKeyB, addrsETHA, valueETH);
-        showMess('Bob send ' + valueETH.toFixed(3) + 'ETH Tx to Ethereum');
-        Eth3.eth.sendRawTransaction(tx, function(err, hash) {
-            if (!err) {
-                var ff = semafor(0, 3, 1);
-                showMess('ETH Tx is success. Checking Ethereum confirmation');
-                console.log('ETH Tx hash: ' + hash);
-                waitConfirmEth(hash);
-            } else
-                showMess('Error while ETH Tx sends: ' + err);
-        });
-    }
-
-    //  Bitcoin functions
-
-    function makeBTCTx(addrsFrom, wifPrivateKey, addrsTo, value, callBack) {
-        param = '?a=' + addrsFrom;
-        param = param + '&b=' + addrsTo;
-        //        valueBTC = document.getElementById('l_pct').value;
-        param = param + '&c=' + value.toString();
-        param = param + '&d=' + wifPrivateKey;
-        $.post('/dex/tx' + param).done(function(ls) {
-            console.log(ls);
-            callBack(ls);
-        }).fail(function(xhr) {
-            showMess('Error while BTC Tx sends: ' + xhr.responseText);
-        });
-    }
-
-    function waitConfirmBtc(hash) {
-        var interval;
-        var timeOut = setTimeout(function() {
-            clearInterval(interval);
-            showMess('Error while mining BTC Tx in next 30 minuts');
-        }, 1800000);
-        interval = setInterval(function() {
-            $.get(hostBtc + '/txs/' + hash)
-                .done(function(tx) {
-                    if (tx.confirmations > 0) {
-                        showMess('BTC Tx is confirmed in block ' + tx.block_height.toString());
-                        clearTimeout(timeOut);
-                        clearInterval(interval);
+    //  Alice's BTC transfer        
+        if (isBtcApi && isEthApi) {
+            showMess('Alice send ' + valueBTC.toFixed(6) + 'BTC to Bob Tx to Bitcoin');
+            var jsonData = JSON.stringify({ from: 'alice', to: 'bob', valueB: valueBTC * 10 ** 8})
+            $.get(hostBtcApi + 'makeTX/' + jsonData)
+                .then(function(d) {
+                    showMess("BTC Tx is successful. Checking Bitcoin confirmation");
+                    console.log('BTC hash Tx=' + d.hash);
+                    var ff = semafor(3, 0, 1);
+                    return;
+                    $.get(hostBtcApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('BTC Tx is confirmed in block ' +  h.block);
                         nextStep();
-                    } //else //console.log(tx)
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText);
+                        })
+               })
+                .fail(function(err) {
+                    console.log(err.status + err.responseText)
+                })
+    //  Bob's ETH transfer
+            showMess('Bob send ' + valueETH.toFixed(3) + 'ETH Tx to Ethereum');
+            var jsonData = JSON.stringify({ from: 'bob', to: 'alice', valueE: valueETH * 10 ** 18});
+            $.get(hostEthApi + 'makeTX/' + jsonData)
+                .then(function(d) {
+                    showMess("ETH Tx is successful. Checking Ethereum confirmation");
+                    console.log('ETH Tx hash ' + d.hash);
+                    var ff = semafor(0, 3, 1);
+                    $.get(hostEthApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('ETH Tx is confirmed in block ' +  h.block);
+                        nextStep();
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText);
+                        })
+               })
+                .fail(function(err) {
+                    console.log(err.status + err.responseText);
+                })
+        }          
+    }
+
+    function callDExOut() {
+        if (isYODAApi) {
+            showMess('Smart contract DEx: form and send outDepo Tx');
+            const jsonData = JSON.stringify({ order: orderID, from: 'plasmoid'})
+            $.get(hostYODAApi + 'outDepo/' + jsonData)
+                .then(function(d) {
+                    showMess('Smart contract DEx: outDepo Tx is successful');
+                    console.log('order=' + orderID + 'hash Tx=' + d.hash);
+                    $.get(hostYODAApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('Smart contract DEx: outDepo Tx is confirmed');
+                        console.log('in Youdex block N ' + h.block);
+                        nextStep();
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText)
+                        })
                 })
                 .fail(function(err) {
-                    showMess('Error while mining BTC Tx: ' + err);
+                    console.log(err.status + err.responseText)
                 })
-        }, 30000);
-    }
 
-    //  Ethereum functions
-
-    function makeEthTX(accountFrom, privateKey, accountTo, summ) {
-        const newTx = {
-            accountFrom: accountFrom,
-            accountTo: accountTo,
-            value: summ
         }
-        $.get(hostEthApi + '/' + newTx)
-        .then(function(d) {
-            summETHA = d.balance;
-            //            summETHA = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
-            document.getElementById('aliceEthBalance').innerText = ' ' + summETHA.toFixed(3) + ' ';
-        });
+     else {
+        }
+     }
 
-        var countTx = Eth3.eth.getTransactionCount(accountFrom);
-        var value = Eth3.toHex(summ * 10 ** 18);
-        var txParams = {
-            nonce: countTx,
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-            to: accountTo,
-            value: value,
-            data: value0,
-            // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-            chainId: 4
-        };
-
-        var tx = new EthJS.Tx(txParams);
-        tx.sign(privateKey);
-        var serializedTx = tx.serialize();
-        return '0x' + serializedTx.toString('hex')
-    }
-
-    function waitConfirmEth(hash) {
-        var interval;
-        var timeOut = setTimeout(function() {
-            clearInterval(interval);
-            showMess('Error while mining ETH Tx in next 5 minuts');
-        }, 300000);
-        interval = setInterval(function() {
-            var block = Eth3.eth.getTransaction(hash);
-            if (block != null & block.blockNumber > 0) {
-                showMess('ETH Tx is confirmed in block ' + block.blockNumber);
-                clearTimeout(timeOut);
-                clearInterval(interval);
-                nextStep();
-                return
-            }
-        }, 5000);
-    }
 </script>
