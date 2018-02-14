@@ -242,8 +242,8 @@
  //  Route - outDepo function 
  app.get("/YODA/outDepo/:data", (req, res) => {
      const order = parseInt(req.params.data),
-         myCallData = DExContract.outDepo.getData(order, from),
-         countTx = YODA3.eth.getTransactionCount(from),
+         myCallData = DExContract.outDepo.getData(order, plasmoid.ethAddrs),
+         countTx = YODA3.eth.getTransactionCount(plasmoid.ethAddrs),
          txParams = {
              nonce: YODA3.toHex(countTx),
              gasPrice: YODA3.toHex(gasPrice),
@@ -275,6 +275,7 @@
      });
  })
 
+ 
  //  Route - waitTx function 
  app.get("/YODA/waitTx/:data", (req, res) => {
      hash = req.params.data;

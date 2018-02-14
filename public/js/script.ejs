@@ -20,11 +20,11 @@
         } else if (stepN == 2) {
             var ff = semafor(1, 0, 0);
             showMess('Alice makes pledge Tx in YODAs');
-            var tx = makeYODATX('alice','plasmoid', valueYODA);
+            makeYODATX('alice','plasmoid', valueYODA);
         } else if (stepN == 3) {
             var ff = semafor(0, 1, 0);
             showMess('Bob makes pledge Tx in YODAs');
-            var tx = makeYODATX('bob', 'plasmoid', valueYODA);
+            makeYODATX('bob', 'plasmoid', valueYODA);
         } else if (stepN == 4) {
             showBalances();
             showMess('Smart contract DEx: inDepo in progress');
@@ -42,15 +42,13 @@
             var ff = semafor(0, 0, 1);
             showBalances();
             showMess('Atomic swap is finished. Plasmoid makes Tx to cancel pledges');
-            var tx = makeYODATX(addrsETHP, ethPrivateKeyP, addrsETHA, valueYODA);
-            showMess('Plasmoid sends ' + valueYODA.toFixed(3) + ' YODAs to Alice');
             document.getElementById('bobStatus').innerText = "Bob received " + valueBTC.toFixed(6) + " BTC";
-            sendTx(addrsETHP, addrsETHA, tx);
+            makeYODATX("plasmoid", "alice", valueYODA);
+            showMess('Plasmoid sends ' + valueYODA.toFixed(3) + ' YODAs to Alice');
         } else if (stepN == 8) {
             showMess("Plasmoid makes Tx to cancel Bobs pledge");
-            var tx = makeYODATX(addrsETHP, ethPrivateKeyP, addrsETHB, valueYODA);
+            makeYODATX("plasmoid", "bob", valueYODA);
             showMess('Plasmoid sends ' + valueYODA.toFixed(3) + ' YODAs to Bob');
-            sendTx(addrsETHP, addrsETHB, tx);
         } else if (stepN == 9) {
             showMess('Smart contract DEx: outDepo in progress');
             callDExOut();
@@ -140,8 +138,8 @@
                 .then(function(d) {
                     showMess("BTC Tx is successful. Checking Bitcoin confirmation");
                     console.log('BTC hash Tx=' + d.hash);
+                    document.getElementById('bobStatus').innerText = valueBTC.toFixed(6) + "BTC Tx received at " + d.time;
                     var ff = semafor(3, 0, 1);
-                    return;
                     $.get(hostBtcApi + 'waitTx/' + d.hash)
                         .then(function(h) {
                         showMess('BTC Tx is confirmed in block ' +  h.block);
@@ -180,7 +178,7 @@
     function callDExOut() {
         if (isYODAApi) {
             showMess('Smart contract DEx: form and send outDepo Tx');
-            const jsonData = JSON.stringify({ order: orderID, from: 'plasmoid'})
+            const jsonData = JSON.stringify({ order: orderID});
             $.get(hostYODAApi + 'outDepo/' + jsonData)
                 .then(function(d) {
                     showMess('Smart contract DEx: outDepo Tx is successful');

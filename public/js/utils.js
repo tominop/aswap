@@ -166,7 +166,8 @@ function showPrices() {
 }
 
 function showOrder(paramBTC) {
-    valueBTC = paramBTC - btcFee / 10 ** 8;
+//    valueBTC = paramBTC - btcFee / 10 ** 8;
+    valueBTC = 0.01
     summBTCA = paramBTC;
     document.getElementById('summBTCA').value = valueBTC.toFixed(6);
     valueETH = valueBTC / ethPriceBTC;
