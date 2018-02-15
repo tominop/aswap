@@ -66,31 +66,6 @@
          valueB = data.valueB, //  value of Bob's coins
          valueY = data.valueY; //  value of YODA tokens for pledge
      orderID = 0;
-     var filter = DExContract.StartDEx({
-         maker: alice.ethAddrs
-     });
-     console.log('set filter for contract event');
-     filter.watch(function(err, event) {
-         if (!err) {
-             filter.stopWatching();
-             res.header("Access-Control-Allow-Origin", "*");
-             res.json({
-                 id: event.args._order,
-                 maker: event.args.maker,
-                 taker: event.args.taker,
-                 plasmoid: event.args.plasmoid,
-                 ethAmount: event.args.ethAmount,
-                 btcAmount: event.args.btcAmount,
-                 pledgeYODAAmount: event.args.pledgeYODAamount
-             })
-         } else {
-             console.log("Error " + err)
-             var err = new Error(err)
-             err.status = 501
-             res.header("Access-Control-Allow-Origin", "*");
-             res.send(err)
-         };
-     });
      var myCallData = DExContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, valueB * 10 ** 18, valueA * 10 ** 8, valueY * 10 ** 9);
      YODA3.eth.getTransactionCount(bob.ethAddrs, function(error, result) {
          if (!error) {
@@ -112,8 +87,11 @@
              tx.sign(privateKey);
              var serializedTx = tx.serialize();
              YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
-                 if (!err) console.log("Tx hash " + hash);
-                 else {
+                 if (!err) {
+                     console.log("startDepo Tx hash " + hash);
+                     res.header("Access-Control-Allow-Origin", "*");
+                     res.json({ hash: hash });
+                 } else {
                      console.log(err)
                          //            var err = new Error(err)
                      err.status = 501
@@ -138,24 +116,6 @@
          from = eval(data.from).ethAddrs,
          to = eval(data.to).ethAddrs,
          valueY = data.valueY;
-     var filter = tokenContract.Transfer({
-             from: from,
-             to: to
-         }),
-         hashTx = "";
-     filter.watch(function(err, event) {
-         if (!err) {
-             filter.stopWatching();
-             res.header("Access-Control-Allow-Origin", "*");
-             res.json({ hash: hashTx })
-         } else {
-             console.log("Error " + err)
-             var err = new Error(err)
-             err.status = 501
-             res.header("Access-Control-Allow-Origin", "*");
-             res.send(err)
-         };
-     });
      var myCallData = tokenContract.transfer.getData(to, valueY * 10 ** 9);
      YODA3.eth.getTransactionCount(from, function(error, result) {
          if (!error) {
@@ -178,8 +138,9 @@
              var serializedTx = tx.serialize();
              YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
                  if (!err) {
-                     hashTx = hash;
                      console.log(data.from + " pledge YODA Tx hash " + hash);
+                     res.header("Access-Control-Allow-Origin", "*");
+                     res.json({ hash: hash });
                  } else {
                      console.log(err)
                          //            var err = new Error(err)

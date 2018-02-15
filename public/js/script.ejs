@@ -69,9 +69,17 @@
             $.get(hostYODAApi + 'startDEX/' + jsonData)
                 .then(function(d) {
                     showMess('Smart contract DEx: startDEx Tx is successful');
-                    orderID = d.id
-                    console.log('order=' + d.id + ' from ' + d.maker + ' to ' + d.taker + ' via: ' + d.plasmoid + ' eth: ' + d.ethAmount / 10 ** 18 + ' btc: ' + d.btcAmount / 10 ** 8 + ' pledge (YODA): ' + d.pledgeYODAAmount / 10 ** 9);
-                    nextStep();
+                    orderID = orderID + 1;
+                    console.log('Order ' + orderID + ', Tx hash ' + d.hash);
+                    $.get(hostYODAApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('Smart contract DEx: startDex Tx is confirmed');
+                        console.log('in Youdex block N ' + h.block);
+                        nextStep();
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText)
+                        })
                 })
                 .fail(function(err) {
                     console.log(err.status + err.responseText)
@@ -89,7 +97,15 @@
                 .then(function(d) {
                     showMess("Transfer " + from + "'s" + " YODAs Tx is successful");
                     console.log('hash Tx=' + d.hash);
-                    nextStep();
+                    $.get(hostYODAApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('Transfer YODA Tx is confirmed');
+                        console.log('in Youdex block N ' + h.block);
+                        nextStep();
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText)
+                        })
                 })
                 .fail(function(err) {
                     console.log(err.status + err.responseText)
