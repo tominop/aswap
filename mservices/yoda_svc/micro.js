@@ -318,12 +318,14 @@
          YODA3.eth.getTransaction(hash, function(error, result) {
              if (!error) {
                  block = result;
-                 if (block != null & block.blockNumber > 0) {
-                     console.log("Tx is confirmed in block " + block.blockNumber);
-                     res.header("Access-Control-Allow-Origin", "*");
-                     res.json({ block: block.blockNumber });
-                     clearTimeout(timeOut);
-                     clearInterval(interval);
+                 if (block != null) {
+                     if (block.blockNumber > 0) {
+                         console.log("Tx is confirmed in block " + block.blockNumber);
+                         res.header("Access-Control-Allow-Origin", "*");
+                         res.json({ block: block.blockNumber });
+                         clearTimeout(timeOut);
+                         clearInterval(interval);
+                     }
                  }
              } else {
                  res.header("Access-Control-Allow-Origin", "*");
