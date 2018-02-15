@@ -156,14 +156,7 @@
                     console.log('https://live.blockcypher.com/btc-testnet/tx/' + d.hash + '/');
                     document.getElementById('bobStatus').innerText = valueBTC.toFixed(6) + "BTC Tx received at " + d.time;
                     var ff = semafor(3, 0, 1);
-                    $.get(hostBtcApi + 'waitTx/' + d.hash)
-                        .then(function(h) {
-                        showMess('BTC Tx is confirmed in block ' +  h.block);
-                        nextStep();
-                        })
-                        .fail(function(err) {
-                            console.log(err.status + err.responseText);
-                        })
+                    waitConfirmBtc(d.hash);
                })
                 .fail(function(err) {
                     console.log(err.status + err.responseText)
@@ -176,7 +169,14 @@
                     showMess("ETH Tx is successful. Checking Ethereum confirmation");
                     console.log('ETH Tx hash ' + d.hash);
                     var ff = semafor(0, 3, 1);
-                   waitConfirmBtc(d.hash);
+                    $.get(hostEthApi + 'waitTx/' + d.hash)
+                        .then(function(h) {
+                        showMess('ETH Tx is confirmed in block ' +  h.block);
+                        nextStep();
+                        })
+                        .fail(function(err) {
+                            console.log(err.status + err.responseText);
+                        })
                })
                 .fail(function(err) {
                     console.log(err.status + err.responseText);
