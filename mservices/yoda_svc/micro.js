@@ -32,8 +32,10 @@
              res.header("Access-Control-Allow-Origin", "*")
              res.json({ error: false, host: urlYoudex, gasPrice: result })
          } else {
-             res.header("Access-Control-Allow-Origin", "*")
-             res.json({ error: true })
+             var err = new Error('Error! p: ' + provider.host + ' not connected!!!')
+             err.status = 501
+             res.header("Access-Control-Allow-Origin", "*");
+             res.send(err)
              console.log('Error! p: ' + provider.host + ' not connected!!!')
          }
      })
@@ -41,10 +43,20 @@
 
  //  Route - check balance of YODA tokens
  app.get("/YODA/balance/:name", (req, res) => {
-     const addrs = eval(req.params.name).ethAddrs,
-         balance = tokenContract.balanceOf(addrs) / 10 ** 9;
-     res.header("Access-Control-Allow-Origin", "*")
-     res.json({ balance: balance, address: addrs })
+     const addrs = eval(req.params.name).ethAddrs;
+     tokenContract.balanceOf(addrs, function(error, result) {
+         if (!error) {
+             const balance = result / 10 ** 9;
+             res.header("Access-Control-Allow-Origin", "*")
+             res.json({ balance: balance, address: addrs })
+         } else {
+             var err = new Error('Error! p: ' + provider.host + ' not connected!!!')
+             err.status = 501
+             res.header("Access-Control-Allow-Origin", "*");
+             res.send(err)
+             console.log('Error! p: ' + provider.host + ' not connected!!!')
+         }
+     })
  })
 
  //  Route - startDex function 
