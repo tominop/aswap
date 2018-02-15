@@ -6,12 +6,49 @@
  */
 
 var isEthApi = isBtcApi = isYODAApi = flag = false,
-    btcFee = 0,
+    btcFee = 0, myUser = "new",
     hostBtc
 
+    function initUser(user) {
+        $.get(hostYODAApi + 'user/' + user)
+            .then(function(d) {
+                if (d.busy) {
+                    modal.style.display = "block";
+                    document.getElementById('alert').innerText = 'Sorry! Atomic Swap Demo is occupied by another user! Please wait...'
+                    document.getElementById("Place").disabled = true;
+                    document.getElementById("Fill").disabled = true;
+                } else if (myUser == "new") {
+                    myUser = "old"
+                    document.getElementById('alert').innerText = 'Now you can start!'
+                    document.getElementById("Place").disabled = false;
+                }
+            })
+            .fail(function(err) {
+                isYODAApi = false
+                if (err.status == 0) console.log('!!!YODA API Microservice not runs')
+                else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
+            })
+        }     
 
 //  Init APIs function
 function initApi() {
+    $.get(hostYODAApi + 'api/')
+        .then(function(d) {
+            if (!d.error) {
+                isYODAApi = true
+                gasPrice = d.gasPrice
+                console.log('YODA API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
+            } else {
+                isYODAApi = false
+                gasPrice = 0
+                console.log('!!!YODA API NOT enabled. Microservice says: YODAx node not response')
+            }
+        })
+        .fail(function(err) {
+            isYODAApi = false
+            if (err.status == 0) console.log('!!!YODA API Microservice not runs')
+            else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
+        })
     $.get(hostEthApi + 'api/')
         .then(function(d) {
             if (!d.error) {
@@ -45,23 +82,6 @@ function initApi() {
             isBtcApi = false
             if (err.status == 0) console.log('!!!BTC API Microservice not runs')
             else console.log('!!!BTC API NOT enabled!!! Microservice says: ' + err.responseText)
-        })
-    $.get(hostYODAApi + 'api/')
-        .then(function(d) {
-            if (!d.error) {
-                isYODAApi = true
-                gasPrice = d.gasPrice
-                console.log('YODA API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
-            } else {
-                isYODAApi = false
-                gasPrice = 0
-                console.log('!!!YODA API NOT enabled. Microservice says: YODAx node not response')
-            }
-        })
-        .fail(function(err) {
-            isYODAApi = false
-            if (err.status == 0) console.log('!!!YODA API Microservice not runs')
-            else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
         })
 }
 
@@ -239,6 +259,8 @@ function placeOrder() {
     document.getElementById('aliceStatus').innerText = 'Order sent, waiting for order accept';
     document.getElementById('bobStatus').innerText = 'Order received, waiting for order accept';
     semafor(0, 1, 0);
+    document.getElementById("Fill").disabled = false;
+    document.getElementById("Place").disabled = true;
 }
 
 function fillOrder() {
@@ -247,6 +269,7 @@ function fillOrder() {
     orderID = 0;
     nextStep();
     semafor(0, 0, 1);
+    document.getElementById("Fill").disabled = true;
 }
 
 function semafor(a, b, c) {
