@@ -1,20 +1,19 @@
 <p class="text-center text-muted" style="font-size: x-small">
-    Copyright &copy; 2017-2018 &middot; Limex
+    Copyright &copy; 2018-2019 &middot; YouDEX
 </p>
 <script>
     <% include ../../public/include/jquery-1.12.4.min.js %>
-    <% include ../../private/include/accounts_btc3.js %>
+    <% include ../../private/include/api.js %>
     <% include ../../public/js/utils.js %>
     initApi();
     var redLed = "width: 20px; height:20px; border-radius: 10px; background: #900;";
     var greenLed = "width: 20px; height:20px; border-radius: 10px; background: #090;";
-    showWallets();
-//        showPrices();
     showDate();
     semafor(1, 0, 0);
 </script>
     <% include ../../public/js/script %>
-<script>    //sendCoin(50000);
+<script>
     setInterval("digitalWatch()", 1000);
     showBalances();
+    showPrices();
 </script>

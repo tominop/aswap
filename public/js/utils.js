@@ -1,24 +1,27 @@
-//var hostBtcApi = 'http://localhost:8100/btc/'; //  main net
-var hostBtcApi = 'http://localhost:8103/btc3/'    // testnet3
-var hostEthApi = 'http://localhost:8200/eth/'
-var isEthApi = isBtcApi = isLmxApi = false
-var hostLmxApi = 'http://localhost:8201/lmx/'
+/*!
+ * @title utils JavaScript functions library for Atomic swap demo
+ * @author Oleg Tomin - <2tominop@gmail.com>
+ * @dev Basic implementaion of JavaScript functions  
+ * MIT Licensed Copyright(c) 2018-2019
+ */
 
-//  Init ETH API function
+var isEthApi = isBtcApi = isYODAApi = flag = false,
+    btcFee = 0,
+    hostBtc
+
+
+//  Init APIs function
 function initApi() {
-    $.get(hostEthApi + 'api/' + tokenEthApi)
+    $.get(hostEthApi + 'api/')
         .then(function(d) {
             if (!d.error) {
                 isEthApi = true
                 gasPrice = d.gasPrice
-                console.log('ETH API enabled on host: ' + d.host + ', gasPrice=' + gasPrice/10**9 + ' Gwei')
-            }
-            else {
+                console.log('ETH API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
+            } else {
                 isEthApi = false
                 gasPrice = 0
                 console.log('!!!ETH API NOT enabled. Microservice says: Infura.io not response')
-                //            alice[1] = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
-                // document.getElementById('aliceEthBalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
             }
         })
         .fail(function(err) {
@@ -26,14 +29,14 @@ function initApi() {
             if (err.status == 0) console.log('!!!ETH API Microservice not runs')
             else console.log('!!!ETH API NOT enabled!!! Microservice says: ' + err.responseText)
         })
-    $.get(hostBtcApi + 'api/' + tokenBtcApi)
+    $.get(hostBtcApi + 'api/')
         .then(function(d) {
             if (!d.error) {
                 isBtcApi = true
-                btcFee = d.btcFee
-                console.log('BTC API enabled on host: ' + d.host + ', limit=' + d.btcFee + ' s')
-            }
-            else {
+                btcFee = d.btcFee / 2 //  let TX size 500 byte 
+                hostBtc = d.host
+                console.log('BTC API enabled on host: ' + d.host + ', btcFee=' + btcFee + 'Sat')
+            } else {
                 isBtcApi = false
                 console.log('!!!BTC API NOT enabled. Microservice says: Blockcypher.com not response')
             }
@@ -43,127 +46,112 @@ function initApi() {
             if (err.status == 0) console.log('!!!BTC API Microservice not runs')
             else console.log('!!!BTC API NOT enabled!!! Microservice says: ' + err.responseText)
         })
-    $.get(hostLmxApi + 'api/' + tokenAddrs)
+    $.get(hostYODAApi + 'api/')
         .then(function(d) {
             if (!d.error) {
-                isLmxApi = true
+                isYODAApi = true
                 gasPrice = d.gasPrice
-                console.log('LMX API enabled on host: ' + d.host + ', gasPrice=' + gasPrice/10**9 + ' Gwei')
-            }
-            else {
-                isLmxApi = false
+                console.log('YODA API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
+            } else {
+                isYODAApi = false
                 gasPrice = 0
-                console.log('!!!LMX API NOT enabled. Microservice says: Limex node not response')
-                //            alice[1] = Eth3.fromWei(Eth3.eth.getBalance(addrsETHA), "ether");
-                // document.getElementById('aliceEthBalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
+                console.log('!!!YODA API NOT enabled. Microservice says: YODAx node not response')
             }
         })
         .fail(function(err) {
-            isLmxApi = false
-            if (err.status == 0) console.log('!!!LMX API Microservice not runs')
-            else console.log('!!!LMX API NOT enabled!!! Microservice says: ' + err.responseText)
+            isYODAApi = false
+            if (err.status == 0) console.log('!!!YODA API Microservice not runs')
+            else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
         })
 }
 
-//  Show wallets function
-function showWallets() {
-    //  Alice's wallet
-    document.getElementById('aliceEth').innerText = ' ' + addrsETHA + ' ';
-    document.getElementById('aliceBtc').innerText = ' ' + addrsBTCA + ' ';
-    document.getElementById('aliceLmx').innerText = ' ' + addrsETHA + ' ';
-    //  Bob's wallet
-    document.getElementById('bobEth').innerText = ' ' + addrsETHB + ' ';
-    document.getElementById('bobBtc').innerText = ' ' + addrsBTCB + ' ';
-    document.getElementById('bobLmx').innerText = ' ' + addrsETHB + ' ';
-    document.getElementById('plasmaLmx').innerText = ' ' + addrsETHP + ' ';
-}
-
-
 //  ShowBalanses function
 function showBalances() {
-
     var timeOut = timeOut1 = timeOut2 = ""
-    //  Alice's wallet
- //   alice.balanceEth();
- //   bob.balanceEth();
     if (!isEthApi) {
         timeOut = setTimeout(function() {
-        showMess('Init ETH API error!')
+            if (isEthApi) {
+                balanceEth('alice')
+                balanceEth('bob')
+            } else showMess('Init ETH API error!')
         }, 3000)
-    }        
-    if (isEthApi) {
-        clearTimeout(timeOut);
-        balanceEth('alice', addrsETHA)
-        balanceEth('bob', addrsETHB)
+    } else {
+        balanceEth('alice')
+        balanceEth('bob')
     }
     if (!isBtcApi) {
         timeOut1 = setTimeout(function() {
-        showMess('Init BTC API error!')
+            if (isBtcApi) {
+                balanceBtc('alice')
+                balanceBtc('bob')
+            } else showMess('Init BTC API error!')
         }, 3000)
-    }        
-    if (isBtcApi) {
-        clearTimeout(timeOut1);
-        balanceBtc('alice', addrsBTCA)
-        balanceBtc('bob', addrsBTCB)
+    } else {
+        balanceBtc('alice')
+        balanceBtc('bob')
     }
-    if (!isLmxApi) {
+    if (!isYODAApi) {
         timeOut2 = setTimeout(function() {
-        showMess('Init LMX API error!')
+            if (isYODAApi) {
+                balanceYODA('alice')
+                balanceYODA('bob')
+                balanceYODA('plasmoid')
+            } else showMess('Init YODA API error!')
         }, 3000)
-    }        
-    if (isLmxApi) {
-        clearTimeout(timeOut2);
-        balanceLmx('alice', addrsETHA)
-        balanceLmx('bob', addrsETHB)
-        balanceLmx('plasma', addrsETHP)
+    } else {
+        balanceYODA('alice')
+        balanceYODA('bob')
+        balanceYODA('plasmoid')
     }
-
-   //    alice[1] = tokenContract.balanceOf(addrsETHA) / 10 ** 9;
-    document.getElementById('aliceLmxBalance').innerText = ' ' + alice[1].toFixed(3) + ' ';
-    //  Bob's wallet
-//    summLIMEB = tokenContract.balanceOf(addrsETHB) / 10 ** 9;
-    document.getElementById('bobLmxBalance').innerText = ' ' + summLIMEB.toFixed(3) + ' ';
-//    summLIMEP = tokenContract.balanceOf(addrsETHP) / 10 ** 9;
-    document.getElementById('plasmaLmxBalance').innerText = ' ' + summLIMEP.toFixed(3) + ' ';
 }
 
-function balanceEth(user, addrsETH) {
-    console.log(user + '  ' + addrsETH)            
-    $.get(hostEthApi + 'balance/' + addrsETH)
-    .then(function(d) {
-        summETH = d.balance;
-        document.getElementById(user + 'EthBalance').innerText = ' ' + summETH.toFixed(3) + ' ';
-    })
-    .fail(function(err) {
-        document.getElementById(user + 'EthBalance').innerText = ' NaN ';
-        console.log(err.status + err.responseText)            
-    })
+function balanceEth(user) {
+    $.get(hostEthApi + 'balance/' + user)
+        .then(function(d) {
+            var summETH = d.balance,
+                addrsETH = d.address;
+            document.getElementById(user + 'Eth').innerText = ' ' + addrsETH + ' ';
+            document.getElementById(user + 'EthBalance').innerText = summETH.toFixed(3);
+            if (user == "bob") summETHB = summETH
+        })
+        .fail(function(err) {
+            document.getElementById(user + 'EthBalance').innerText = ' NaN ';
+            console.log(err.status + err.responseText)
+        })
 }
 
-function balanceBtc(user, addrsBTC) {
-    console.log(user + '  ' + addrsBTC)            
-    $.get(hostBtcApi + 'balance/' + addrsBTC)
-    .then(function(d) {
-        summBTC = d.balance;
-        document.getElementById(user + 'BtcBalance').innerText = ' ' + summBTC.toFixed(6) + ' ';
-    })
-    .fail(function(err) {
-        document.getElementById(user + 'BtcBalance').innerText = ' NaN ';
-        console.log(err.status + err.responseText)            
-    })
+function balanceBtc(user) {
+    $.get(hostBtcApi + 'balance/' + user)
+        .then(function(d) {
+            const summBTCa = d.balance,
+                addrsBTC = d.address;
+            document.getElementById(user + 'Btc').innerText = ' ' + addrsBTC + ' ';
+            document.getElementById(user + 'BtcBalance').innerText = summBTCa.toFixed(6);
+            if (user == "alice" && !flag) {
+                showOrder(summBTCa);
+            }
+        })
+        .fail(function(err) {
+            document.getElementById(user + 'BtcBalance').innerText = ' NaN ';
+            console.log(err.status + err.responseText)
+        })
 }
 
-function balanceLmx(user, addrsETH) {
-    console.log(user + '  ' + addrsETH)            
-    $.get(hostLmxApi + 'balance/' + addrsETH)
-    .then(function(d) {
-        summETH = d.balance;
-        document.getElementById(user + 'LmxBalance').innerText = ' ' + summETH.toFixed(3) + ' ';
-    })
-    .fail(function(err) {
-        document.getElementById(user + 'LmxBalance').innerText = ' NaN ';
-        console.log(err.status + err.responseText)            
-    })
+function balanceYODA(user) {
+    $.get(hostYODAApi + 'balance/' + user)
+        .then(function(d) {
+            var summETH = d.balance,
+                addrsETH = d.address;
+            document.getElementById(user + 'YODA').innerText = ' ' + addrsETH + ' ';
+            document.getElementById(user + 'YODABalance').innerText = summETH.toFixed(3);
+            if (user == "alice") summYODAA = summETH;
+            else if (user == "bob") summYODAB = summETH;
+            else if (user == "plasmoid") summYODAP = summETH;
+        })
+        .fail(function(err) {
+            document.getElementById(user + 'YODABalance').innerText = ' NaN ';
+            console.log(err.status + err.responseText)
+        })
 }
 
 function showPrices() {
@@ -173,16 +161,22 @@ function showPrices() {
             var ethPriceUSD_s = d[0].price_usd;
             ethPriceBTC = parseFloat(ethPriceBTC_s);
             ethPriceUSD = parseFloat(ethPriceUSD_s);
-            lmxPrice = (1.0 / ethPriceUSD).toFixed(6);
-            lmxPrice_s = lmxPrice.toString();
-            document.getElementById('plasmaPrices').innerText = 'ETH/BTC= ' + ethPriceBTC_s + '; ETH/USD= ' + ethPriceUSD_s + '; LIME/ETH= ' + lmxPrice_s + ';';
-            valueBTC = alice[0];
-            document.getElementById('summBTCA').value = valueBTC.toFixed(6);
-            valueETH = valueBTC / ethPriceBTC;
-            valueLIME = valueETH / lmxPrice;
-            document.getElementById('summETHA').value = valueETH.toFixed(3);
-            document.getElementById('summLIMEA').value = valueLIME.toFixed(3);
+            YODAPrice = (1.0 / 1000.0).toFixed(6);
+            YODAPrice_s = YODAPrice.toString();
+            document.getElementById('plasmoidPrices').innerText = 'ETH/BTC= ' + ethPriceBTC_s + '; ETH/USD= ' + ethPriceUSD_s + '; YODA/ETH= ' + YODAPrice_s + ';';
         });
+}
+
+function showOrder(paramBTC) {
+    //    valueBTC = paramBTC - btcFee / 10 ** 8;
+    valueBTC = 0.01
+    summBTCA = paramBTC;
+    document.getElementById('summBTCA').value = valueBTC.toFixed(6);
+    valueETH = valueBTC / ethPriceBTC;
+    valueYODA = valueETH / YODAPrice;
+    document.getElementById('summETHA').value = valueETH.toFixed(3);
+    document.getElementById('summYODAA').value = valueYODA.toFixed(3);
+    flag = true;
 }
 
 function showMess(s) {
@@ -196,28 +190,30 @@ function showMess(s) {
 function calcEth() {
     valueBTC = document.getElementById('summBTCA').value;
     valueETH = valueBTC / ethPriceBTC;
-    valueLIME = valueETH / lmxPrice;
+    valueYODA = valueETH / YODAPrice;
     document.getElementById('summETHA').value = valueETH.toFixed(3);
-    document.getElementById('summLIMEA').value = valueLIME.toFixed(3);
+    document.getElementById('summYODAA').value = valueYODA.toFixed(3);
 }
 
 function calcBtc() {
     valueETH = document.getElementById('summETHA').value;
     valueBTC = valueETH * ethPriceBTC;
-    valueLIME = valueETH / lmxPrice;
+    valueYODA = valueETH / YODAPrice;
     document.getElementById('summBTCA').value = valueBTC.toFixed(6);
-    document.getElementById('summLIMEA').value = valueLIME.toFixed(3);
+    document.getElementById('summYODAA').value = valueYODA.toFixed(3);
 }
 
 function placeOrder() {
-    nStr = 0;
-    valueBTC = parseFloat(document.getElementById('alice[0]').value);
+    var err = false,
+        errStr = '';
+    nStr = 0; //  Init log string number 
+    valueBTC = parseFloat(document.getElementById('summBTCA').value);
     valueETH = parseFloat(document.getElementById('summETHA').value);
-    valueLIME = parseFloat(document.getElementById('summLIMEA').value);
-    var err = false;
-    var errStr = '';
-    showMess("Alice places order: " + valueBTC.toFixed(6) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueLIME.toFixed(3) + "LIME");
-    if (valueBTC > alice[0]) {
+    valueYODA = parseFloat(document.getElementById('summYODAA').value);
+    var err = false,
+        errStr = '';
+    showMess("Alice places order: " + valueBTC.toFixed(6) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueYODA.toFixed(3) + "YODA");
+    if (valueBTC > summBTCA) {
         errStr = 'Alice has not enough BTC! ';
         err = true;
     };
@@ -225,12 +221,12 @@ function placeOrder() {
         errStr = errStr + 'Bob has not enough ETH! ';
         err = true;
     };
-    if (valueLIME > alice[1]) {
-        errStr = errStr + 'Alice has not enough LIME! ';
+    if (valueYODA > summYODAA) {
+        errStr = errStr + 'Alice has not enough YODA! ';
         err = true;
     };
-    if (valueLIME > summLIMEB) {
-        errStr = errStr + 'Bob has not enough LIME! ';
+    if (valueYODA > summYODAB) {
+        errStr = errStr + 'Bob has not enough YODA! ';
         err = true;
     };
     if (err) {
@@ -239,14 +235,14 @@ function placeOrder() {
     };
     document.getElementById('summBTCB').value = valueBTC.toFixed(6);
     document.getElementById('summETHB').value = valueETH.toFixed(3);
-    document.getElementById('summLIMEB').value = valueLIME.toFixed(3);
+    document.getElementById('summYODAB').value = valueYODA.toFixed(3);
     document.getElementById('aliceStatus').innerText = 'Order sent, waiting for order accept';
     document.getElementById('bobStatus').innerText = 'Order received, waiting for order accept';
     semafor(0, 1, 0);
 }
 
 function fillOrder() {
-    showMess("Bob accepts order: " + valueBTC.toFixed(3) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueLIME.toFixed(3) + "LIME");
+    showMess("Bob accepts order: " + valueBTC.toFixed(3) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueYODA.toFixed(3) + "YODA");
     stepN = 0;
     orderID = 0;
     nextStep();
@@ -262,7 +258,7 @@ function semafor(a, b, c) {
     else if (c == 0) document.getElementById('plasmoidLed').style = greenLed;
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > 2 * 1000) {
+        if ((new Date().getTime() - start) > 2 * 100) {
             break;
         }
     }
@@ -280,7 +276,7 @@ function sendEth1() {
 }
 
 function sendCoin(value) {
-    valueLIME = value;
+    valueYODA = value;
     stepN = 6;
     nextStep();
 }
