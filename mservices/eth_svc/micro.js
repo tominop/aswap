@@ -19,7 +19,7 @@ const express = require("express"),
     bob = require("../../private/keystore/bob"); //  address and private key in Ethereum (Youdex) and Bitcoin;
 
 var gasPrice = 0;
-    Eth3 = "";
+Eth3 = "";
 
 app.get("/eth/api/", (req, res) => {
     Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token));
@@ -37,9 +37,9 @@ app.get("/eth/api/", (req, res) => {
 });
 
 app.get("/eth/balance/:name", (req, res) => {
-//    const Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token));
+    //    const Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token));
     const addrs = eval(req.params.name).ethAddrs;
-        Eth3.eth.getBalance(addrs, function(error, result) {
+    Eth3.eth.getBalance(addrs, function(error, result) {
         if (!error) {
             balance = result / 10 ** 18;
             res.header("Access-Control-Allow-Origin", "*");
@@ -54,58 +54,54 @@ app.get("/eth/balance/:name", (req, res) => {
 
 //  Route - makeTX function
 app.get("/eth/makeTX/:data", (req, res) => {
-    const data = JSON.parse(req.params.data),
-        from = eval(data.from).ethAddrs,
-        to = eval(data.to).ethAddrs,
-        valueE = data.valueE,
-        countTx = Eth3.eth.getTransactionCount(from),
-        txParams = {
-            nonce: Eth3.toHex(countTx),
-            gasPrice: Eth3.toHex(gasPrice),
-            gasLimit: Eth3.toHex(gasLimit),
-            to: to,
-            value: Eth3.toHex(valueE),
-            data: "0x0"
-                // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-                // chainId: YODA3.toHex(1337)
-        };
-    console.log(
-        txParams.nonce +
-        " " +
-        txParams.gasPrice +
-        " " +
-        txParams.gasLimit +
-        " " +
-        txParams.to +
-        " " +
-        txParams.value +
-        " " +
-        txParams.data
-    );
-    var tx = new EthJS(txParams);
-    console.log("tx success key " + eval(data.from).ethKey);
-    const privateKey = new Buffer(eval(data.from).ethKey, "hex");
-    tx.sign(privateKey);
-    var serializedTx = tx.serialize();
-    Eth3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"), function(
-        err,
-        hash
-    ) {
-        if (!err) {
-            console.log(data.from + " ETH Tx hash " + hash);
-            res.header("Access-Control-Allow-Origin", "*");
-            res.json({ hash: hash });
-        } else {
-            console.log(err);
-            //            var err = new Error(err)
-            err.status = 501;
-            res.header("Access-Control-Allow-Origin", "*");
-            res.send(err);
-        }
-    });
-});
+        const data = JSON.parse(req.params.data),
+            from = eval(data.from).ethAddrs,
+            to = eval(data.to).ethAddrs,
+            valueE = data.valueE;
+        Eth3.eth.getTransactionCount(from, function(error, result) {
+            if (!error) {
+                countTx = result;
 
-//  Route - waitTx function
+                const txParams = {
+                    nonce: Eth3.toHex(countTx),
+                    gasPrice: Eth3.toHex(gasPrice),
+                    gasLimit: Eth3.toHex(gasLimit),
+                    to: to,
+                    value: Eth3.toHex(valueE),
+                    data: "0x0"
+                        // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
+                        // chainId: YODA3.toHex(1337)
+                };
+                console.log(txParams.nonce + " " + txParams.gasPrice + " " +
+                    txParams.gasLimit + " " + txParams.to + " " + txParams.value +
+                    " " + txParams.data);
+                var tx = new EthJS(txParams);
+                console.log("tx success key " + eval(data.from).ethKey);
+                const privateKey = new Buffer(eval(data.from).ethKey, "hex");
+                tx.sign(privateKey);
+                var serializedTx = tx.serialize();
+                Eth3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"), function(
+                    err, hash) {
+                    if (!err) {
+                        console.log(data.from + " ETH Tx hash " + hash);
+                        res.header("Access-Control-Allow-Origin", "*");
+                        res.json({ hash: hash });
+                    } else {
+                        console.log(err);
+                        //            var err = new Error(err)
+                        err.status = 501;
+                        res.header("Access-Control-Allow-Origin", "*");
+                        res.send(err);
+                    }
+                });
+            } else {
+                res.header("Access-Control-Allow-Origin", "*");
+                res.json({ error: true });
+                console.log("Error! p: " + provider.host + " not connected!!!");
+            }
+        });
+    })
+    //  Route - waitTx function
 app.get("/eth/waitTx/:data", (req, res) => {
     hash = req.params.data;
     console.log("wait ETH confirmation tx " + hash)
@@ -119,7 +115,16 @@ app.get("/eth/waitTx/:data", (req, res) => {
         res.send(err);
     }, 60000);
     interval = setInterval(function() {
-        var block = Eth3.eth.getTransaction(hash);
+        var block;
+        Eth3.eth.getTransaction(hash, function(error, result) {
+            if (!error) {
+                block = result;
+            } else {
+                res.header("Access-Control-Allow-Origin", "*");
+                res.json({ error: true });
+                console.log("Error! p: " + provider.host + " not connected!!!");
+            }
+        });
         console.log("block " + block);
         if (block != null) {
             if (block.blockNumber > 0) {
