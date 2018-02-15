@@ -176,14 +176,7 @@
                     showMess("ETH Tx is successful. Checking Ethereum confirmation");
                     console.log('ETH Tx hash ' + d.hash);
                     var ff = semafor(0, 3, 1);
-                    $.get(hostEthApi + 'waitTx/' + d.hash)
-                        .then(function(h) {
-                        showMess('ETH Tx is confirmed in block ' +  h.block);
-                        nextStep();
-                        })
-                        .fail(function(err) {
-                            console.log(err.status + err.responseText);
-                        })
+                   waitConfirmBtc(d.hash);
                })
                 .fail(function(err) {
                     console.log(err.status + err.responseText);
@@ -217,5 +210,27 @@
      else {
         }
      }
+
+    function waitConfirmBtc(hash) {
+        var interval;
+        var timeOut = setTimeout(function() {
+            clearInterval(interval);
+            showMess('Error while mining BTC Tx in next 30 minuts');
+        }, 1800000);
+        interval = setInterval(function() {
+            $.get(hostBtc + '/txs/' + hash)
+                .done(function(tx) {
+                    if (tx.confirmations > 0) {
+                        showMess('BTC Tx is confirmed in block ' + tx.block_height.toString());
+                        clearTimeout(timeOut);
+                        clearInterval(interval);
+                        nextStep();
+                    } //else //console.log(tx)
+                })
+                .fail(function(err) {
+                    showMess('Error while mining BTC Tx: ' + err);
+                })
+        }, 30000);
+    }
 
 </script>

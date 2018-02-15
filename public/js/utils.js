@@ -6,7 +6,8 @@
  */
 
 var isEthApi = isBtcApi = isYODAApi = flag = false,
-    btcFee = 0
+    btcFee = 0,
+    hostBtc
 
 
 //  Init APIs function
@@ -33,6 +34,7 @@ function initApi() {
             if (!d.error) {
                 isBtcApi = true
                 btcFee = d.btcFee / 2 //  let TX size 500 byte 
+                hostBtc = d.host
                 console.log('BTC API enabled on host: ' + d.host + ', btcFee=' + btcFee + 'Sat')
             } else {
                 isBtcApi = false
@@ -166,7 +168,7 @@ function showPrices() {
 }
 
 function showOrder(paramBTC) {
-//    valueBTC = paramBTC - btcFee / 10 ** 8;
+    //    valueBTC = paramBTC - btcFee / 10 ** 8;
     valueBTC = 0.01
     summBTCA = paramBTC;
     document.getElementById('summBTCA').value = valueBTC.toFixed(6);
