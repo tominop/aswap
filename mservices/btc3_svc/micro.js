@@ -66,15 +66,15 @@ app.get("/btc3/makeTx/:data", (req, res) => {
         .then(response => {
             var tmptx = response.data;
             tmptx.pubkeys = [];
-//            console.log(tmptx);
-            tmptx.signatures = tmptx.tosign.map(function (tosign, n) {
-                tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
-                return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
-            })
-            // sending back the transaction with all the signatures to broadcast
+            //            console.log(tmptx);
+            tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
+                    tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
+                    return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
+                })
+                // sending back the transaction with all the signatures to broadcast
             axios.post(btcUrl + '/txs/send', JSON.stringify(tmptx))
                 .then(response => {
-  //                  console.log('Tx hash ' + response.data.tx.hash);
+                    //                  console.log('Tx hash ' + response.data.tx.hash);
                     res.header("Access-Control-Allow-Origin", "*");
                     res.json({ hash: response.data.tx.hash, time: response.data.tx.received });
                 })
@@ -99,7 +99,7 @@ app.get("/btc3/makeTx/:data", (req, res) => {
 app.get("/btc3/waitTx/:data", (req, res) => {
     hash = req.params.data;
     var interval;
-    var timeOut = setTimeout(function () {
+    var timeOut = setTimeout(function() {
         clearInterval(interval);
         var err = new Error("Error while mining BTC Tx in next 30 min.");
         err.status = 504;
@@ -107,11 +107,12 @@ app.get("/btc3/waitTx/:data", (req, res) => {
         res.header("Access-Control-Allow-Origin", "*");
         res.send(err);
     }, 1800000);
-    interval = setInterval(function () {
+    interval = setInterval(function() {
         axios.get(btcUrl + '/txs/' + hash)
             .then(response => {
                 console.log('tx ' + response.data.hash)
                 if (response.data.confirmations > 0) {
+                    console.log("BTC Tx block " + response.data.block_height);
                     res.header("Access-Control-Allow-Origin", "*");
                     res.json({ block: response.data.block_height });
                     clearTimeout(timeOut);

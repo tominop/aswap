@@ -153,7 +153,7 @@
             $.get(hostBtcApi + 'makeTX/' + jsonData)
                 .then(function(d) {
                     showMess("BTC Tx is successful. Checking Bitcoin confirmation");
-                    console.log('BTC hash Tx=' + d.hash);
+                    console.log('https://live.blockcypher.com/btc-testnet/tx/' + d.hash + '/');
                     document.getElementById('bobStatus').innerText = valueBTC.toFixed(6) + "BTC Tx received at " + d.time;
                     var ff = semafor(3, 0, 1);
                     $.get(hostBtcApi + 'waitTx/' + d.hash)
