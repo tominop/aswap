@@ -9,7 +9,7 @@ app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 
 // ===================================================
-app.get('/dex', function(req, res) {
+app.get('/', function(req, res) {
 
     res.render('pages/index');
 

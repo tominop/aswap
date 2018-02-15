@@ -18,7 +18,7 @@ const express = require("express"),
     alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
     bob = require("../../private/keystore/bob"); //  address and private key in Ethereum (Youdex) and Bitcoin;
 
-var gasPrice = 0,
+var gasPrice = 0;
     Eth3 = "";
 
 app.get("/eth/api/", (req, res) => {
@@ -37,10 +37,19 @@ app.get("/eth/api/", (req, res) => {
 });
 
 app.get("/eth/balance/:name", (req, res) => {
-    const addrs = eval(req.params.name).ethAddrs,
-        balance = Eth3.eth.getBalance(addrs) / 10 ** 18;
-    res.header("Access-Control-Allow-Origin", "*");
-    res.json({ balance: balance, address: addrs });
+//    const Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token));
+    const addrs = eval(req.params.name).ethAddrs;
+        Eth3.eth.getBalance(addrs, function(error, result) {
+        if (!error) {
+            balance = result / 10 ** 18;
+            res.header("Access-Control-Allow-Origin", "*");
+            res.json({ error: false, balance: balance, address: addrs });
+        } else {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.json({ error: true });
+            console.log("Error! p: " + provider.host + " not connected!!!");
+        }
+    })
 });
 
 //  Route - makeTX function
