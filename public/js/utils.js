@@ -5,7 +5,7 @@
  * MIT Licensed Copyright(c) 2018-2019
  */
 
-var isEthApi = isBtcApi = isYODAApi = flag = false,
+var isApi = isEthApi = isBtcApi = isYODAApi = flag = false,
     btcFee = 0, myUser = "new",
     hostBtc
 
@@ -24,7 +24,8 @@ var isEthApi = isBtcApi = isYODAApi = flag = false,
                 }
             })
             .fail(function(err) {
-                isYODAApi = false
+                isYODAApi = false;
+                isApi = false;
                 if (err.status == 0) console.log('!!!YODA API Microservice not runs')
                 else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
             })
@@ -35,13 +36,15 @@ function initApi() {
     $.get(hostYODAApi + 'api/')
         .then(function(d) {
             if (!d.error) {
-                isYODAApi = true
-                gasPrice = d.gasPrice
+                isYODAApi = true;
+                isApi = true;
+                gasPrice = d.gasPrice;
                 console.log('YODA API enabled on host: ' + d.host + ', gasPrice=' + gasPrice / 10 ** 9 + ' Gwei')
             } else {
-                isYODAApi = false
+                isYODAApi = false;
+                isApi = false;
                 gasPrice = 0
-                console.log('!!!YODA API NOT enabled. Microservice says: YODAx node not response')
+                console.log('!!!YODA API NOT enabled. Microservice says: Youdex node not response')
             }
         })
         .fail(function(err) {
@@ -49,6 +52,7 @@ function initApi() {
             if (err.status == 0) console.log('!!!YODA API Microservice not runs')
             else console.log('!!!YODA API NOT enabled!!! Microservice says: ' + err.responseText)
         })
+
     $.get(hostEthApi + 'api/')
         .then(function(d) {
             if (!d.error) {
