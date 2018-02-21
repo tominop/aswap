@@ -8,10 +8,7 @@
 const express = require("express"),
     app = express(),
     axios = require("axios"),
-    urlEth = "http://10.20.40.5:8080/",
-    token = "",
-    //     urlEth = 'https://rinkeby.infura.io/',
-    //     token = 'Yqt5FtYMQRGrpp6GSnVe'
+    eth = require("../../private/keystore/youdex"),
     Web3 = require("web3"),
     EthJS = require("ethereumjs-tx"),
     gasLimit = 4700000,
@@ -24,17 +21,17 @@ Eth3 = "";
 //  Route - userActive function 
 app.get("/eth/user/:data", (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.json({ busy: false });    
+    res.json({ busy: false });
 })
 
 
 app.get("/eth/api/", (req, res) => {
-    Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token));
+    Eth3 = new Web3(new Web3.providers.HttpProvider(eth.url + eth.token));
     Eth3.eth.getGasPrice(function(error, result) {
         if (!error) {
             gasPrice = result;
             res.header("Access-Control-Allow-Origin", "*");
-            res.json({ error: false, host: urlEth, gasPrice: result });
+            res.json({ error: false, host: eth.url, gasPrice: result });
         } else {
             res.header("Access-Control-Allow-Origin", "*");
             res.json({ error: true });
@@ -44,7 +41,6 @@ app.get("/eth/api/", (req, res) => {
 });
 
 app.get("/eth/balance/:name", (req, res) => {
-    //    const Eth3 = new Web3(new Web3.providers.HttpProvider(urlEth + token));
     const addrs = eval(req.params.name).ethAddrs;
     Eth3.eth.getBalance(addrs, function(error, result) {
         if (!error) {
