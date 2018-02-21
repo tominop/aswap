@@ -28,12 +28,12 @@
      axios.get(btc.url)
          .then(response => {
              res.header("Access-Control-Allow-Origin", "*")
-             res.json({ error: false, host: btc.url, btcFee: response.data.medium_fee_per_kb })
+             res.json({ error: false, host: btc.url, btcFee: response.data.high_fee_per_kb })
          })
          .catch(error => {
              res.header("Access-Control-Allow-Origin", "*")
              res.json({ error: true })
-             console.log('Error! p: ' + btc.url + ' not connected!!!')
+             console.log('init Api: ' + error)
          })
  })
 
@@ -67,11 +67,12 @@
          inputs: [{ addresses: from }],
          outputs: [{ addresses: to, value: valueB }]
      };
-     axios.post(btc.url + '/txs/new?token=' + btc.token, JSON.stringify(newtx))
+ //    axios.post(btc.url + '/txs/new?token=' + btc.token, JSON.stringify(newtx))
+ axios.post(btc.url + '/txs/new', JSON.stringify(newtx))
          .then(response => {
              var tmptx = response.data;
              tmptx.pubkeys = [];
-             console.log(tmptx.errors);
+             console.log('response ' + tmptx);
              tmptx.signatures = tmptx.tosign.map(function(tosign, n) {
                      tmptx.pubkeys.push(keys.getPublicKeyBuffer().toString("hex"));
                      return keys.sign(new buffer.Buffer(tosign, "hex")).toDER().toString("hex");
@@ -84,20 +85,23 @@
                      res.json({ hash: response.data.tx.hash, time: response.data.tx.received });
                  })
                  .catch(error => {
-                     console.log(error.response);
-                     err = new Error('BTC API service dropped Tx');
+                     console.log("error2" + error.status + " what" + error.data);
+                     err = new Error('');
                      err.status = 504;
+                     err.response = "Blockcypher reset Tx"
                      res.header("Access-Control-Allow-Origin", "*");
                      res.send(err);
                  })
          })
          .catch(error => {
-             console.log(error.response);
-             err = new Error('BTC API service not aviable');
+             console.log('makeTX' + error + JSON.stringify(error.response.data));
+             err = new Error();
              err.status = 501;
+             err.response = "Bad parameters";
              res.header("Access-Control-Allow-Origin", "*");
-             res.send(err);
+             res.json(err);
          })
+        
  })
 
  //  Route - waitTx function 

@@ -7,6 +7,7 @@
         summBTCP = summETHP = summYODAP = 0,
         ethPriceBTC = ethPriceUSD = YODAPrice = 0,
         nStr = stepN = orderID = 0,
+        myError = "",
         timeNow = "";
 
     function nextStep() {
@@ -153,17 +154,26 @@
             showMess('Alice send ' + valueBTC.toFixed(6) + 'BTC to Bob Tx to Bitcoin');
             var jsonData = JSON.stringify({ from: 'alice', to: 'bob', valueB: valueBTC * 10 ** 8})
             $.get(hostBtcApi + 'makeTX/' + jsonData)
-                .then(function(d) {
+                .then(function(err, d) {
+                    if (!err) {
                     showMess("BTC Tx is successful. Checking Bitcoin confirmation");
-                    console.log('https://live.blockcypher.com/btc-testnet/tx/' + d.hash + '/');
+                    console.log('https://live.blockcypher.com/btc/tx/' + d.hash + '/');
                     document.getElementById('bobStatus').innerText = valueBTC.toFixed(6) + "BTC Tx received at " + d.time;
                     var ff = semafor(3, 0, 1);
+                    }
+                    else {
+                        myError = err;
+                        console.log('BTC makeTx error ' + err.status + ': ' + err.response);
+                    isApi = false;
+                    }
+return;
                     waitConfirmBtc(d.hash);
                })
                 .fail(function(err) {
                     console.log(err.status + err.responseText)
                 })
     //  Bob's ETH transfer
+    return;
             showMess('Bob send ' + valueETH.toFixed(3) + 'ETH Tx to Ethereum');
             var jsonData = JSON.stringify({ from: 'bob', to: 'alice', valueE: valueETH * 10 ** 18});
             $.get(hostEthApi + 'makeTX/' + jsonData)
