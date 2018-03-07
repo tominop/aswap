@@ -18,4 +18,4 @@ app.get('/', function(req, res) {
 // ==================================================
 app.listen(1965);
 
-console.log('Server start on http://localhost:1965');
+console.log((new Date()).toString() + ': ASWAP server start on http://localhost:1965');

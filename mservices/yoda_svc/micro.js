@@ -360,7 +360,7 @@
  const port = process.env.PORT_YODA || 8201
 
  app.listen(port, () => {
-     console.log(`microservice YODA_svc listening on ${port}`)
+     console.log((new Date()).toString() + `: microservice YODA_svc listening on ${port}`)
  })
 
  function a() {

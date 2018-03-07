@@ -212,5 +212,5 @@ app.get("/eth/waitTx/:data", (req, res) => {
 const port = process.env.PORT_ETH || 8200;
 
 app.listen(port, () => {
-    console.log(`Microservice eth_svc listening on ${port}`);
+    console.log((new Date()).toString() + `: Microservice eth_svc listening on ${port}`);
 });

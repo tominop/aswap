@@ -144,5 +144,5 @@ app.get("/btc/waitTx/:data", (req, res) => {
 const port = process.env.PORT_BTC || 8100
 
 app.listen(port, () => {
-    console.log(`Microservice btc_svc listening on ${port}`)
+    console.log((new Date()).toString() + `: Microservice btc_svc listening on ${port}`)
 })
