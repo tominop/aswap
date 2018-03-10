@@ -5,60 +5,50 @@
  * MIT Licensed Copyright(c) 2018-2019
  */
 
-const express = require("express"),
-    app = express(),
-    axios = require('axios'), //  AXIOS - compact lib for HttpRequest
-    urlYoudex = 'http://10.20.40.5:8080/', //  JSON-RPC server Youdex node
-    Web3 = require("web3"),
-    EthJS = require("ethereumjs-tx"),
-    gasLimit = 4700000,
-    YODA = require("./lib/yoda_abi"), // address and ABI of YODA smart contract in Youdex
-    uar = require("./lib/uar_abi"), // address and ABI of UserAddrsReg smart contract in Youdex
-    alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-    bob = require("../../private/keystore/bob"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-    plasmoid = require("../../private/keystore/plasmoid"); //  address and private key in Ethereum (Youdex);
+//  Local variables    
+const express = require("express");
+//  Global variables    
+app = express();
+ //   axios = require('axios'), //  AXIOS - compact lib for HttpRequest
+//    uar = require("./lib/uar_abi"), // address and ABI of UserAddrsReg smart contract in Youdex
 
-var gasPrice,
-    YODA3 = tokenContract = dexContract = '',
-    userActive = 0; //  init variables
+//  CORS
+app.use(function(req, res, next) {
+    // Website you wish to allow to connect
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    // Pass to next layer of middleware
+    next();
+});
 
-//  Route - connect to API provider, set global variables YODA3, gasPrice
-router.get("/YODA/api/", function(req, res) {
-    YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex));
-    tokenContract = YODA3.eth.contract(YODA.abi).at(YODA.address) // YODA token smart contract in YODAx
-    YODA3.eth.getGasPrice(function (error, result) { //  calculate gas price
-        if (!error) {
-            gasPrice =  YODA3.toHex(result);
-            gasLimit = YODA3.toHex(4700000);
-            res.header("Access-Control-Allow-Origin", "*")
-            res.json({ error: false, host: urlYoudex, gasPrice: result })
-        } else {
-            var err = new Error('Error! p: ' + provider.host + ' not connected!!!')
-            err.status = 501
-            res.header("Access-Control-Allow-Origin", "*");
-            res.send(err)
-            console.log('Error! p: ' + provider.host + ' not connected!!!')
-        }
-    })
-})
-
-
-
-//  YODA API & token YODA routes     
-const yodaRoutes = require('./lib/yoda');
-app.use('/', yodaRoutes);
-
+//  YODA API common functions & token YODA routes     
+require('./lib/yoda');
+    
 //  DEx smart contract routes     
-const dexRoutes = require('./lib/dex');
-app.use('/', dexRoutes);
+require('./lib/dex');
 
 //  UserAddrsReg smart contract routes     
-const uarRoutes = require('./lib/uar');
-app.use('/', uarRoutes);
+require('./lib/uar');
+
+app.set('env', 'development');
+// development error handler
+// will print stacktrace
+
+app.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.send(err)
+    if (app.get('env') === 'development') console.log(err);
+});
 
 
 
-const port = process.env.PORT_YODA1 || 8202
+const port = process.env.PORT_YODA1 || 8201
 
 app.listen(port, () => {
     console.log((new Date()).toString() + `: microservice YODA1_svc listening on ${port}`)
