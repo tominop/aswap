@@ -24,26 +24,24 @@
 
  //  Route - userActive function 
  app.get("/YODA/user/:data", (req, res) => {
-    const user = req.params.data;
-    if (user == "old") {
-        userActive = new Date().getTime();
-        busy = false;
-    }
-    else if (user == "new") {
-        const newTime = new Date().getTime();
-        if (newTime - userActive > 10000 ) {
-            busy = false;
-            userActive = newTime;
-        }
-        else busy = true
-    }
-    res.header("Access-Control-Allow-Origin", "*");
-    res.json({ busy: busy });    
-})
+     const user = req.params.data;
+     if (user == "old") {
+         userActive = new Date().getTime();
+         busy = false;
+     } else if (user == "new") {
+         const newTime = new Date().getTime();
+         if (newTime - userActive > 10000) {
+             busy = false;
+             userActive = newTime;
+         } else busy = true
+     }
+     res.header("Access-Control-Allow-Origin", "*");
+     res.json({ busy: busy });
+ })
 
  //  Route - check connect to API provider
  app.get("/YODA/api/", (req, res) => {
-    YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex))
+     YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex))
      tokenContract = YODA3.eth.contract(YODA.abi).at(YODA.address) // YODA token smart contract in YODAx
      DExContract = YODA3.eth.contract(dex.abi).at(dex.address) //  Dex smart contract in Youdex
      YODA3.eth.getGasPrice(function(error, result) { //  calculate gas price
@@ -360,9 +358,5 @@
  const port = process.env.PORT_YODA || 8201
 
  app.listen(port, () => {
-     console.log(`microservice YODA_svc listening on ${port}`)
+     console.log((new Date()).toString() + `: microservice YODA_svc listening on ${port}`)
  })
-
- function a() {
-
- }

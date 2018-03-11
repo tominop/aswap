@@ -1,7 +1,7 @@
 {
-    "name": "btc3_svc",
-    "version": "2.0.1",
-    "description": "BTC API testnet3 WS microservices",
+    "name": "yoda_svc",
+    "version": "1.0.3",
+    "description": "youdex_api microservices",
     "main": "micro.js",
     "scripts": {
         "test": "echo \\\\\\\"Error: no test specified\\\\\\\" && exit 1",
@@ -9,9 +9,8 @@
     },
     "keywords": [
         "youdex",
-        "DEX",
-        "btc3",
-        "testnet",
+        "yoda",
+        "ethereum",
         "API",
         "microservice"
     ],
