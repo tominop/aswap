@@ -3,7 +3,8 @@ const uarContract = YODA3.eth.contract(uar.abi).at(uar.address); //  Dex smart c
 
 //  Route - newUser function
 app.get("/YODA/uar/newuser/:data", function (req, res, next) {
-    const data = YODA3.toHex((req.params.data).replace(/-/g, ''));
+//    const data = YODA3.toHex((req.params.data).replace(/-/g, ''));
+    const data = '0x' + (req.params.data).replace(/-/g, '');
     console.log('uid: ' + data);
     makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), res, next);
 })
@@ -25,7 +26,8 @@ app.get("/YODA/uar/newaddrs/:data", function (req, res, next) {
         };
     }
     else next(new Error('Error: invalid currency symbol: ' + data.symbol));
-    data.uid = YODA3.toHex((data.uid).replace(/-/g, ''));
+//    data.uid = YODA3.toHex((data.uid).replace(/-/g, ''));
+    data.uid = '0x' + (data.uid).replace(/-/g, '');
     console.log('symbol: ' + data.symbol + ' addrs: ' + data.address + ' uid: ' + data.uid);
     makeYoudexTx('plasmoid', uar.address, 0, uarContract.newAddrs.getData(data.symbol, data.address, data.uid), res, next);
 })
@@ -42,7 +44,8 @@ app.get("/YODA/uar/setuser/:data", function (req, res, next) {
 
 //  Route - checkUser function
 app.get("/YODA/uar/checkuser/:data", function (req, res, next) {
-    const data = YODA3.toHex((req.params.data).replace(/-/g, ''));
+//    const data = YODA3.toHex((req.params.data).replace(/-/g, ''));
+    const data = '0x' + (req.params.data).replace(/-/g, '');
     console.log('uid: ' + data);
     uarContract.checkUser(data, function (error, result) {
         if (error) next(error)
@@ -57,22 +60,3 @@ app.get("/YODA/uar/checkaddrs/:data", function (req, res, next) {
         else res.json(result);
     });
 })
-
-//  Route - outDepo function 
-app.get("/YODA/outUAR/:data", function (req, res, next) {
-    const order = parseInt(req.params.data),
-        myCallData = DExContract.outDepo.getData(order, plasmoid.ethAddrs);
-    makeYoudexTx('plasmoid', uar.address, 0, myCallData, res, next);
-})
-
-
-//  Route - startDex function 
-app.get("/YODA/startUAR/:data", function (req, res) {
-    const data = JSON.parse(req.params.data),
-        valueA = data.valueA, //  value of Alice's coins
-        valueB = data.valueB, //  value of Bob's coins
-        valueY = data.valueY; //  value of YODA tokens for pledge
-    orderID = 0;
-    myCallData = DExContract.openDEx.getData(alice.ethAddrs, plasmoid.ethAddrs, valueB * 10 ** 18, valueA * 10 ** 8, valueY * 10 ** 9);
-    makeYoudexTx('bob', uar.address, 0, myCallData, res);
-});

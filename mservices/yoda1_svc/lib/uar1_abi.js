@@ -1,5 +1,5 @@
 module.exports = {
-    'address': '0xc3e79faed95fc6c11ca3863b0659047e550db110',
+    'address': '0x48bf06f92de7853b1bb01be22deaad3c5969efd3',
     'abi': [
         {
             "constant": true,
@@ -34,7 +34,7 @@ module.exports = {
             "inputs": [
               {
                 "name": "_uID",
-                "type": "bytes16"
+                "type": "bytes32"
               }
             ],
             "name": "newUser",
@@ -61,7 +61,7 @@ module.exports = {
               },
               {
                 "name": "_uID",
-                "type": "bytes16"
+                "type": "bytes32"
               }
             ],
             "name": "newAddrs",
@@ -80,7 +80,7 @@ module.exports = {
             "inputs": [
               {
                 "name": "_uID",
-                "type": "bytes16"
+                "type": "bytes32"
               },
               {
                 "name": "_status",
@@ -126,7 +126,7 @@ module.exports = {
             "inputs": [
               {
                 "name": "_uID",
-                "type": "bytes16"
+                "type": "bytes32"
               }
             ],
             "name": "checkUser",
@@ -164,7 +164,7 @@ module.exports = {
               },
               {
                 "name": "uID",
-                "type": "bytes16"
+                "type": "bytes32"
               }
             ],
             "payable": false,
