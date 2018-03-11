@@ -6,6 +6,7 @@ const yoda = require("./yoda_abi"),  // address and ABI of YODA smart contract i
 
 //  Global variables
 YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex));
+EthUtils = require("ethjs-util");
 alice = require("../../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
     bob = require("../../../private/keystore/bob"), //  address and private key in Ethereum (Youdex) and Bitcoin;
     plasmoid = require("../../../private/keystore/plasmoid"), //  address and private key in Ethereum (Youdex);

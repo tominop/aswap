@@ -9,6 +9,8 @@
 const express = require("express");
 //  Global variables    
 app = express();
+
+
  //   axios = require('axios'), //  AXIOS - compact lib for HttpRequest
 //    uar = require("./lib/uar_abi"), // address and ABI of UserAddrsReg smart contract in Youdex
 
