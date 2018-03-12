@@ -2,12 +2,7 @@ const uar = require("./uar_abi"); // address and ABI of UserAddrReg smart contra
 const uarContract = YODA3.eth.contract(uar.abi).at(uar.address); //  Dex smart contract in Youdex
 
 //  Route - newUser function
-<<<<<<< HEAD
-app.get("/YODA/uar/newuser/:data", function (req, res, next) {
-//    const data = YODA3.toHex((req.params.data).replace(/-/g, ''));
-=======
 app.get("/YODA/uar/newuser/:data", function(req, res, next) {
->>>>>>> 5ecb0bd7258cafef6669d577355069e7eaeabc58
     const data = '0x' + (req.params.data).replace(/-/g, '');
     console.log('uid: ' + data);
     makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), res, next);
@@ -29,13 +24,7 @@ app.get("/YODA/uar/newaddrs/:data", function(req, res, next) {
             data.symbol = YODA3.toHex(data.symbol + ('*').repeat(40 - len - 2) + (data.address).substring(20, len));
             data.address = YODA3.toHex((data.address).substring(0, 20));
         };
-<<<<<<< HEAD
-    }
-    else next(new Error('Error: invalid currency symbol: ' + data.symbol));
-//    data.uid = YODA3.toHex((data.uid).replace(/-/g, ''));
-=======
     } else next(new Error('Error: invalid currency symbol: ' + data.symbol));
->>>>>>> 5ecb0bd7258cafef6669d577355069e7eaeabc58
     data.uid = '0x' + (data.uid).replace(/-/g, '');
     console.log('symbol: ' + data.symbol + ' addrs: ' + data.address + ' uid: ' + data.uid);
     makeYoudexTx('plasmoid', uar.address, 0, uarContract.newAddrs.getData(data.symbol, data.address, data.uid), res, next);
@@ -52,18 +41,13 @@ app.get("/YODA/uar/setuser/:data", function(req, res, next) {
 })
 
 //  Route - checkUser function
-<<<<<<< HEAD
-app.get("/YODA/uar/checkuser/:data", function (req, res, next) {
-//    const data = YODA3.toHex((req.params.data).replace(/-/g, ''));
-=======
 app.get("/YODA/uar/checkuser/:data", function(req, res, next) {
->>>>>>> 5ecb0bd7258cafef6669d577355069e7eaeabc58
     const data = '0x' + (req.params.data).replace(/-/g, '');
     console.log('uid: ' + data);
     uarContract.checkUser(data, function(error, result) {
         if (error) next(error)
-        else if (result[0] == 0) next(new Error('user not found'))
-        else res.json({ status: result[0], numAddrs: result[1] });
+        res.json({ status: result[0], numAddrs: result[1] });
+        if (result[0] == 0) makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), res, next);
     });
 })
 
@@ -77,8 +61,4 @@ app.get("/YODA/uar/checkaddrs/:data", function(req, res, next) {
         if (error) next(error)
         else res.json({ symbol: result[0], status: result[1], uid: result[2] });
     });
-<<<<<<< HEAD
 })
-=======
-})
->>>>>>> 5ecb0bd7258cafef6669d577355069e7eaeabc58

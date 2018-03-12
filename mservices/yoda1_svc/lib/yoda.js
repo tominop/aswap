@@ -6,14 +6,28 @@ const yoda = require("./yoda_abi"),  // address and ABI of YODA smart contract i
 
 //  Global variables
 YODA3 = new Web3(new Web3.providers.HttpProvider(urlYoudex));
-alice = require("../../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-    bob = require("../../../private/keystore/bob"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-    plasmoid = require("../../../private/keystore/plasmoid"), //  address and private key in Ethereum (Youdex);
-    gasLimit = gasPrice = '',
-    userActive = 0; //  init variables
+alice = require("../../../private/keystore/alice"); //  address and private key in Ethereum (Youdex) and Bitcoin;
+bob = require("../../../private/keystore/bob"); //  address and private key in Ethereum (Youdex) and Bitcoin;
+plasmoid = require("../../../private/keystore/plasmoid"); //  address and private key in Ethereum (Youdex);
+gasLimit = gasPrice = '';
+userActive = 0; //  init variables
 
 // YODA token smart contract in Youdex
 const yodaContract = YODA3.eth.contract(yoda.abi).at(yoda.address);
+
+initYoudexApi = function (mess, res) {
+    YODA3.eth.getGasPrice(function (error, result) { //  calculate gas price
+        if (error) next(error)
+        else {
+            gasPrice = YODA3.toHex(result);
+            gasLimit = YODA3.toHex(4700000);
+            if (res) res.json({ error: false, host: urlYoudex, gasPrice: result });
+            console.log((new Date()).toYMDTString() +  ' ' + mess + ', ' + 'gasPrice ' + result);
+        };
+    });
+};
+
+initYoudexApi('connect to Youdex RPC server at ' + urlYoudex);
 
 makeYoudexTx = function (walletFrom, To, amount, data, res, next) {
     YODA3.eth.getTransactionCount(eval(walletFrom).ethAddrs, function (error, result) {
@@ -61,15 +75,9 @@ app.get("/YODA/user/:data", function (req, res) {
 });
 
 //  Route - connect to API provider, set global variables YODA3, gasPrice
-app.get("/YODA/api/", function (req, res) {
-    YODA3.eth.getGasPrice(function (error, result) { //  calculate gas price
-        if (error) next(error)
-        else {
-            gasPrice = YODA3.toHex(result);
-            gasLimit = YODA3.toHex(4700000);
-            res.json({ error: false, host: urlYoudex, gasPrice: result });
-        };
-    });
+app.get("/YODA/api/:data", function (req, res) {
+    const mess = 'service ' + req.params.data + ' connected';
+    initYoudexApi(mess, res);
 });
 
 //  Route - check balance of YODA tokens

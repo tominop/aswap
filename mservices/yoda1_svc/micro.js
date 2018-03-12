@@ -9,7 +9,12 @@
 const express = require("express");
 //  Global variables    
 app = express();
-
+Date.prototype.toYMDTString = function () {return isNaN (this) ? 'NaN' : 
+[this.getFullYear(), this.getMonth() > 8 ? this.getMonth() + 1 : '0' +  (this.getMonth() + 1),
+ this.getDate() > 9 ? this.getDate() : '0' + this.getDate()].join('/') + ' ' +
+[this.getUTCHours() < 10 ? '0' + this.getUTCHours() : this.getUTCHours(), 
+this.getMinutes() < 10 ? '0' + this.getMinutes() : this.getMinutes(),
+this.getSeconds() < 10 ? '0' + this.getSeconds() : this.getSeconds()].join(':')};
 
  //   axios = require('axios'), //  AXIOS - compact lib for HttpRequest
 //    uar = require("./lib/uar_abi"), // address and ABI of UserAddrsReg smart contract in Youdex
@@ -45,7 +50,7 @@ app.set('env', 'development');
 app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.send(err)
-    if (app.get('env') === 'development') console.log(err);
+    console.log((new Date()).toYMDTString() + ' ' + err.message);
 });
 
 
@@ -53,5 +58,5 @@ app.use(function (err, req, res, next) {
 const port = process.env.PORT_YODA1 || 8201
 
 app.listen(port, () => {
-    console.log((new Date()).toString() + `: microservice YODA1_svc listening on ${port}`)
+    console.log((new Date()).toYMDTString() + ` microservice YODA1_svc listening on ${port}`)
 })
