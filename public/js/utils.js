@@ -8,26 +8,25 @@
 var isYODAApi = isEthApi = isBtcApi = flag = false,
     btcFee = 0,
     myUser = "new",
-    hostBtc 
+    hostBtc
 
-    function start1() {
-        $.ajaxSetup({
-            error: function(x, e) {
+function start1() {
+    $.ajaxSetup({
+        error: function(x, e) {
 
-                if (x.status == 0) {
-                    alert(' Check Your Network.');
-                } 
-                   else if (x.status == 404) {
+            if (x.status == 0) {
+                alert(' Check Your Network.');
+            } else if (x.status == 404) {
                 alert('Requested URL not found.');
 
-                } else if (x.status == 500) {
-                    alert('Internel Server Error.');
-                }  else {
-                    alert('Unknow Error.\n' + x.responseText);
-                }
+            } else if (x.status == 500) {
+                alert('Internel Server Error.');
+            } else {
+                alert('Unknow Error.\n' + x.responseText);
             }
-        });
-    }
+        }
+    });
+}
 
 function initUser(user) {
     if (isApi) {
@@ -77,7 +76,7 @@ function serviceStop(text, stop) {
 
 //  Init APIs function
 function initApi() {
-    $.get(hostYODAApi + 'api/')
+    $.get(hostYODAApi + 'api/ASWAP')
         .then(function(d) {
             if (!d.error) {
                 isYODAApi = true;
@@ -105,7 +104,7 @@ function initApi() {
                 isEthApi = false
                 gasPrice = 0
                 console.log('!!!ETH API NOT enabled. Microservice says: Infura.io not response')
-            } 
+            }
         })
         .fail(function(err) {
             isEthApi = false
@@ -332,7 +331,7 @@ function placeOrder() {
 function fillOrder() {
     showMess("Bob accepts order: " + valueBTC.toFixed(3) + "BTC to  " + valueETH.toFixed(3) + "ETH with pledge:" + valueYODA.toFixed(3) + "YODA");
     stepN = 0;
-//    stepN = 4;    for bitcoin Tx tests only
+    //    stepN = 4;    for bitcoin Tx tests only
     orderID = 0;
     nextStep();
     semafor(0, 0, 1);
