@@ -5,7 +5,7 @@ const uarContract = YODA3.eth.contract(uar.abi).at(uar.address); //  Dex smart c
 app.get("/YODA/uar/newuser/:data", function(req, res, next) {
     const data = '0x' + (req.params.data).replace(/-/g, '');
     console.log('uid: ' + data);
-    makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), res, next);
+    makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), next, res);
 })
 
 //  Route - newAddr function
@@ -27,7 +27,7 @@ app.get("/YODA/uar/newaddrs/:data", function(req, res, next) {
     } else next(new Error('Error: invalid currency symbol: ' + data.symbol));
     data.uid = '0x' + (data.uid).replace(/-/g, '');
     console.log('symbol: ' + data.symbol + ' addrs: ' + data.address + ' uid: ' + data.uid);
-    makeYoudexTx('plasmoid', uar.address, 0, uarContract.newAddrs.getData(data.symbol, data.address, data.uid), res, next);
+    makeYoudexTx('plasmoid', uar.address, 0, uarContract.newAddrs.getData(data.symbol, data.address, data.uid), next, res);
 })
 
 //  Route - setUserStatus function
@@ -36,7 +36,7 @@ app.get("/YODA/uar/setuser/:data", function(req, res, next) {
         var uid = (req.params.data).substring(0, 36),
             status = parseInt((req.params.data).substring(37, 38));
         uid = '0x' + (uid).replace(/-/g, '');
-        makeYoudexTx('plasmoid', uar.address, 0, uarContract.setUserStatus.getData(uid, status), res, next);
+        makeYoudexTx('plasmoid', uar.address, 0, uarContract.setUserStatus.getData(uid, status), next, res);
     } else next(new Error('Error: length of data string not equal 38! (' + (req.params.data).length + ')'));
 })
 
@@ -47,7 +47,7 @@ app.get("/YODA/uar/checkuser/:data", function(req, res, next) {
     uarContract.checkUser(data, function(error, result) {
         if (error) next(error)
         res.json({ status: result[0], numAddrs: result[1] });
-        if (result[0] == 0) makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), res, next);
+        if (result[0] == 0) makeYoudexTx('plasmoid', uar.address, 0, uarContract.newUser.getData(data), next);
     });
 })
 

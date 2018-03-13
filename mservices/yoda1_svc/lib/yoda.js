@@ -29,7 +29,7 @@ initYoudexApi = function(mess, res) {
 
 initYoudexApi('connect to Youdex RPC server at ' + urlYoudex);
 
-makeYoudexTx = function(walletFrom, To, amount, data, res, next) {
+makeYoudexTx = function(walletFrom, To, amount, data, next, res) {
     YODA3.eth.getTransactionCount(eval(walletFrom).ethAddrs, function(error, result) {
         if (error) next(error)
         else {
@@ -52,7 +52,7 @@ makeYoudexTx = function(walletFrom, To, amount, data, res, next) {
             const serializedTx = tx.serialize();
             YODA3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
                 if (err) next(err)
-                else res.json({ hash: hash });
+                else if (res) res.json({ hash: hash });
             });
         };
     });
