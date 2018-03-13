@@ -180,7 +180,7 @@ app.get('/btc3/ws/:addrs', (req, res) => {
             else {
                 res.send('ws connected on wss://socket.blockcypher.com/v1/btc/test3');
                 console.log(
-                    'ws connected on wss://socket.blockcypher.com/v1/btc/test3' + '\n'
+                    'ws connected on wss://socket.blockcypher.com/v1/btc/test3'
                 );
             };
         });
@@ -241,6 +241,7 @@ app.listen(port, () => {
 });
 
 function waitConfirmation(hash) {
+    console.log('creating webhook');
     var webhook = {
         "event": "tx-confirmation",
         "hash": hash,
@@ -249,7 +250,10 @@ function waitConfirmation(hash) {
     }
     var url = 'https://api.blockcypher.com/v1/btc/test3/hooks?token=' + token;
     axios.post(url, JSON.stringify(webhook))
-        .then(function(d) { console.log(d) });
+        .then(function(d) { console.log(d) })
+        .catch(function(err) {
+            myErrorHandler(err.message);
+        });
 };
 /*
     wss.on('connection', (ws: ExtWebSocket) => {
