@@ -78,7 +78,7 @@ app.get('/btc3/api/', (req, res) => {
         .catch(error => {
 
             res.json({ error: true });
-            console.log('Error! p: ' + btcUrl + ' not connected!!!' + '\n');
+            console.log('Error! p: ' + btcUrl + ' not connected!!!');
         });
 });
 
@@ -186,7 +186,7 @@ app.get('/btc3/ws/:addrs', (req, res) => {
         });
     });
     ws.on('close', function close() {
-        console.log('ws disconnected' + '\n');
+        console.log('ws disconnected');
     });
 });
 
@@ -243,11 +243,11 @@ app.listen(port, () => {
 function waitConfirmation(hash) {
     console.log('creating webhook');
     var webhook = {
-        "event": "tx-confirmation",
-        "hash": hash,
-        "confirmations": 1,
-        "url": "http://178.62.224.216:8201/btc3/txconfirm"
-    }
+        event: "tx-confirmation",
+        hash: hash,
+        confirmations: 1,
+        url: "http://178.62.224.216:8201/btc3/txconfirm"
+    };
     var url = 'https://api.blockcypher.com/v1/btc/test3/hooks?token=' + token;
     axios.post(url, JSON.stringify(webhook))
         .then(function(d) { console.log(d) })
