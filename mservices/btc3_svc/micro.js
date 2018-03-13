@@ -19,6 +19,7 @@ const express = require('express'),
     WebSocket = require('ws');
 
 unconfirmedTxHash = 'Nan, try get btc/ws/addr';
+isConfirmed = false;
 
 Date.prototype.toYMDTString = function() {
     return isNaN(this) ? 'NaN' : [this.getFullYear(), this.getMonth() > 8 ? this.getMonth() + 1 : '0' + (this.getMonth() + 1),
@@ -57,8 +58,8 @@ app.get('/btc3/user/:data', (req, res) => {
 
 //  Route - userActive function
 app.get('/btc3/txhash/', (req, res) => {
-    res.json({ hash: unconfirmedTxHash });
-    unconfirmedTxHash = 'Nan, try get btc/ws/addr';
+    res.json({ hash: unconfirmedTxHash, confirmation: isConfirmed });
+    //    unconfirmedTxHash = 'Nan, try get btc/ws/addr';
 });
 
 
@@ -165,6 +166,8 @@ app.get('/btc3/ws/:addrs', (req, res) => {
         // console.log(event);
         var tx = JSON.parse(event);
         unconfirmedTxHash = tx.hash;
+        console.log('unconfirmed tx hash ' + unconfirmedTxHash);
+        waitConfirmation(unconfirmedTxHash);
         var shortHash = tx.hash.substring(0, 6) + '...';
         var total = tx.total / 100000000;
         var addrs = tx.addresses.join(', ');
@@ -222,6 +225,13 @@ app.get('/btc3/waitTx/:data', (req, res) => {
     }, 30000);
 });
 
+//  Route - balance of address
+app.post('/btc3/txconfirm', (req, res) => {
+    console.log(req);
+    isConfirmed = true;
+});
+
+
 const port = process.env.PORT_BTC3 || 8103;
 
 app.listen(port, () => {
@@ -229,6 +239,18 @@ app.listen(port, () => {
         new Date().toString() + `: Microservice btc_svc listening on ${port}`
     );
 });
+
+function waitConfirmation(hash) {
+    var webhook = {
+        "event": "tx-confirmation",
+        "hash": hash,
+        "confirmations": 1,
+        "url": "http://178.62.224.216:8201/btc3/txconfirm"
+    }
+    var url = 'https://api.blockcypher.com/v1/btc/test3/hooks?token=' + token;
+    axios.post(url, JSON.stringify(webhook))
+        .then(function(d) { console.log(d) });
+};
 /*
     wss.on('connection', (ws: ExtWebSocket) => {
 
