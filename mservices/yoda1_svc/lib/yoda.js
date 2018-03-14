@@ -91,21 +91,21 @@ app.get("/YODA/balance/:name", function(req, res) {
 
 
 //  Route - yoda token transfer function 
-app.get('/YODA/tokenTX/:data', function(req, res) {
+app.get('/YODA/tokenTX/:data', function(req, res, next) {
     const data = JSON.parse(req.params.data);
     const myCallData = yodaContract.transfer.getData(eval(data.to).ethAddrs, data.valueY * 10 ** 9);
-    makeYoudexTx(data.from, yoda.address, 0, myCallData, res);
+    makeYoudexTx(data.from, yoda.address, 0, myCallData, next, res);
 })
 
 
 //  Route - eth transfer function 
-app.get("/YODA/makeTx/:data", function(req, res) {
+app.get("/YODA/makeTx/:data", function(req, res, next) {
     const data = JSON.parse(req.params.data);
-    makeYoudexTx(data.from, eval(data.to).ethAddrs, data.valueE, '0x0', res);
+    makeYoudexTx(data.from, eval(data.to).ethAddrs, data.valueE, '0x0', next, res);
 })
 
 //  Route - getTransactionReceipt 
-app.get("/YODA/getTx/:data", function(req, res) {
+app.get("/YODA/getTx/:data", function(req, res, next) {
     YODA3.eth.getTransactionReceipt(req.params.data, function(error, result) {
         if (error) next(error)
         else res.json(result)
@@ -113,7 +113,7 @@ app.get("/YODA/getTx/:data", function(req, res) {
 })
 
 //  Route - waitTx function 
-app.get("/YODA/waitTx/:data", function(req, res) {
+app.get("/YODA/waitTx/:data", function(req, res, next) {
     hash = req.params.data;
     var interval;
     var timeOut = setTimeout(function() {
