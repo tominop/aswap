@@ -52,7 +52,7 @@ Date.prototype.toYMDTString = function() {
 
 myErrorHandler = function(message, res) {
     if (res) res.json({ error: true, response: "Error: " + message });
-    console.log((new Date()).toYMDTString() + "Error: " + message);
+    console.log((new Date()).toYMDTString() + "Error: " + message); 
 };
 
 //  CORS
@@ -197,7 +197,7 @@ function startWS(url, addrs, res) {
         Tx.findOne({ hashTx: TxHash }).exec(function(err, incomingTx) {
             if (err) return myErrorHandler("incoming Tx: " + err.message);
             // returns stories that have Bob's id as their author.
-            if (incomingTx != null) incomingTx.confirmTx = tx.confirmations;
+            if (incomingTx != null) incomingTx.confirms = tx.confirmations;
             else {
                 addrFrom = tx.inputs[0].addresses[0];
                 addrTo = tx.outputs[0].addresses[0];
@@ -205,7 +205,7 @@ function startWS(url, addrs, res) {
                 incomingTx = new Tx({
                     hashTx: tx.hash,
                     createDateUTC: tx.received,
-                    confirmTx: tx.confirmations,
+                    confirms: tx.confirmations,
                     addrFrom: addrFrom,
                     value: value,
                     To: addrTo
@@ -217,16 +217,16 @@ function startWS(url, addrs, res) {
         });
         confirmations = tx.confirmations;
         if (confirmations > 0) isConfirmed = true;
-        console.log("tx hash " + TxHash + "; confirmations " + confirmations);
+        console.log((new Date()).toYMDTString() + " tx hash " + TxHash + "; confirmations " + confirmations);
     });
     ws.on("open", function open() {
         ws.send(
             JSON.stringify({ event: "unconfirmed-tx", address: addrs }),
             function ask(error) {
-                if (error) myErrorHandler("error.message", res);
+                if (error) myErrorHandler('ws open1 :' + error.message, res);
                 else {
                     if (res) res.send("ws1 connected on " + url);
-                    console.log("ws1 connected on " + url);
+                    console.log((new Date()).toYMDTString() + " ws1 connected on " + url);
                     wsIsLive = true;
                 }
             }
@@ -238,15 +238,15 @@ function startWS(url, addrs, res) {
                 confirmations: 1
             }),
             function ask1(error) {
-                if (error) myErrorHandler("error.message");
+                if (error) myErrorHandler('ws open1 :' + error.message);
                 else {
-                    console.log("ws2 connected on " + url);
+                    console.log((new Date()).toYMDTString() + " ws2 connected on " + url);
                 }
             }
         );
     });
     ws.on("close", function close() {
-        console.log("ws disconnected, try restart");
+        console.log((new Date()).toYMDTString() + " ws disconnected, try restart");
         wsIsLive = false;
     });
 }
@@ -288,7 +288,7 @@ app.get("/btc3/waitTx/:data", (req, res) => {
 
 //  Route - balance of address
 app.post("/btc3/txconfirm", (req, res) => {
-    console.log(req);
+    console.log((new Date()).toYMDTString() + req);
     isConfirmed = true;
 });
 
@@ -302,6 +302,6 @@ const port = process.env.PORT_BTC3 || 8103;
 
 app.listen(port, () => {
     console.log(
-        new Date().toString() + `: Microservice btc_svc listening on ${port}`
+        (new Date()).toYMDTString() + ` Microservice btc_svc listening on ${port}`
     );
 });
