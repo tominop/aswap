@@ -8,21 +8,31 @@
 const express = require("express"),
     app = express(),
     axios = require("axios"), //  AXIOS - compact lib for HttpRequest
-    token = "c97f6432c2ba4d3b8d3ced1407e9ec0a", // for main net
     alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
     bob = require("../../private/keystore/bob"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-    btcUrl = "https://api.blockcypher.com/v1/btc/test3", //  Blochcypher API provider for Bitcoin testnet3
+    btc = require("../../private/keystore/btc"), //  Blochcypher API provider for Bitcoin mainnet
     bitcoin = require("bitcoinjs-lib"),
     testnet = bitcoin.networks.testnet,
     bigi = require("bigi"),
     buffer = require("buffer"),
     WebSocket = require("ws");
+Tx = require("../../private/twist/models/transactions");
 
 unconfirmedTxHash = "Nan, try get btc/ws/addr";
 isConfirmed = false;
 wsIsLive = false;
 wsIsNeed = undefined;
 ws = null;
+
+//  Configure mongoDB
+const dbConfig = require("../../private/twist/db"),
+    mongoose = require("mongoose");
+// Connect to DB
+mongoose.connect(dbConfig.url, {
+    useMongoClient: true
+});
+
+mongoose.Promise = require("bluebird");
 
 Date.prototype.toYMDTString = function() {
     return isNaN(this) ?
@@ -42,7 +52,7 @@ Date.prototype.toYMDTString = function() {
 
 myErrorHandler = function(message, res) {
     if (res) res.json({ error: true, response: "Error: " + message });
-    console.log(new Date().toYMDTString() + "Error: " + message);
+    console.log((new Date()).toYMDTString() + "Error: " + message);
 };
 
 //  CORS
@@ -80,17 +90,17 @@ app.get("/btc3/txhash/", (req, res) => {
 //  Route - check connect to API provider
 app.get("/btc3/api/", (req, res) => {
     axios
-        .get(btcUrl)
+        .get(btc.url)
         .then(response => {
             res.json({
                 error: false,
-                host: btcUrl,
+                host: btc.url,
                 btcFee: response.data.medium_fee_per_kb
             });
         })
         .catch(error => {
             res.json({ error: true });
-            console.log("Error! p: " + btcUrl + " not connected!!!");
+            console.log("Error! p: " + btc.url + " not connected!!!");
         });
 });
 
@@ -99,7 +109,7 @@ app.get("/btc3/balance/:name", (req, res) => {
     //  Standart format API
     const addrsBTC = eval(req.params.name).btcAddrs;
     axios
-        .get(btcUrl + "/addrs/" + addrsBTC + "/balance")
+        .get(btc.url + "/addrs/" + addrsBTC + "/balance")
         .then(response => {
             res.json({
                 balance: response.data.final_balance / 10 ** 8,
@@ -129,7 +139,7 @@ app.get("/btc3/makeTx/:data", (req, res) => {
         outputs: [{ addresses: to, value: valueB }]
     };
     axios
-        .post(btcUrl + "/txs/new?token=" + token, JSON.stringify(newtx))
+        .post(btc.url + "/txs/new?token=" + btc.token, JSON.stringify(newtx))
         .then(response => {
             var tmptx = response.data;
             tmptx.pubkeys = [];
@@ -143,7 +153,7 @@ app.get("/btc3/makeTx/:data", (req, res) => {
             });
             // sending back the transaction with all the signatures to broadcast
             axios
-                .post(btcUrl + "/txs/send?token=" + token, JSON.stringify(tmptx))
+                .post(btc.url + "/txs/send?token=" + btc.token, JSON.stringify(tmptx))
                 .then(response => {
                     console.log("Tx hash " + response.data.tx.hash);
 
@@ -171,7 +181,7 @@ app.get("/btc3/makeTx/:data", (req, res) => {
 app.get("/btc3/ws/:addrs", (req, res) => {
     if (!wsIsLive)
         startWS("wss://socket.blockcypher.com/v1/btc/test3", req.params.addrs, res);
-    else myErrorHandler("websocket is running now", res);
+    else res.json({ error: false });
 });
 
 function startWS(url, addrs, res) {
@@ -183,18 +193,31 @@ function startWS(url, addrs, res) {
         wsIsLive = true;
         if (event.length < 20) return;
         var tx = JSON.parse(event);
-        unconfirmedTxHash = tx.hash;
-        var confirmations = tx.confirmations;
+        TxHash = tx.hash;
+        Tx.findOne({ hashTx: TxHash }).exec(function(err, incomingTx) {
+            if (err) return myErrorHandler("incoming Tx: " + err.message);
+            // returns stories that have Bob's id as their author.
+            if (incomingTx != null) incomingTx.confirmTx = tx.confirmations;
+            else {
+                addrFrom = tx.inputs[0].addresses[0];
+                addrTo = tx.outputs[0].addresses[0];
+                value = tx.outputs[0].value;
+                incomingTx = new Tx({
+                    hashTx: tx.hash,
+                    createDateUTC: tx.received,
+                    confirmTx: tx.confirmations,
+                    addrFrom: addrFrom,
+                    value: value,
+                    To: addrTo
+                });
+            }
+            incomingTx.save(function(err) {
+                if (err) myErrorHandler(err.message);
+            });
+        });
+        confirmations = tx.confirmations;
         if (confirmations > 0) isConfirmed = true;
-        console.log(
-            "tx hash " + unconfirmedTxHash + "; confirmations " + confirmations
-        );
-        //        waitConfirmation(unconfirmedTxHash);
-        var shortHash = tx.hash.substring(0, 6) + "...";
-        var total = tx.total / 100000000;
-        var addrs = tx.addresses.join(", ");
-        count++;
-        //        if (count > 0) ws.close();
+        console.log("tx hash " + TxHash + "; confirmations " + confirmations);
     });
     ws.on("open", function open() {
         ws.send(
@@ -202,13 +225,8 @@ function startWS(url, addrs, res) {
             function ask(error) {
                 if (error) myErrorHandler("error.message", res);
                 else {
-                    if (res)
-                        res.send(
-                            "ws1 connected on " + url
-                        );
-                    console.log(
-                        "ws1 connected on " + url
-                    );
+                    if (res) res.send("ws1 connected on " + url);
+                    console.log("ws1 connected on " + url);
                     wsIsLive = true;
                 }
             }
@@ -222,9 +240,7 @@ function startWS(url, addrs, res) {
             function ask1(error) {
                 if (error) myErrorHandler("error.message");
                 else {
-                    console.log(
-                        "ws2 connected on " + url
-                    );
+                    console.log("ws2 connected on " + url);
                 }
             }
         );
@@ -249,7 +265,7 @@ app.get("/btc3/waitTx/:data", (req, res) => {
     }, 1800000);
     interval = setInterval(function() {
         axios
-            .get(btcUrl + "/txs/" + hash)
+            .get(btc.url + "/txs/" + hash)
             .then(response => {
                 console.log("tx " + response.data.hash);
                 if (response.data.confirmations > 0) {
@@ -277,8 +293,9 @@ app.post("/btc3/txconfirm", (req, res) => {
 });
 
 setInterval(() => {
-    if (wsIsLive) ws.send(JSON.stringify({ event: "ping" }))
-    else if (wsIsNeed) startWS("wss://socket.blockcypher.com/v1/btc/test3", wsIsNeed);
+    if (wsIsLive) ws.send(JSON.stringify({ event: "ping" }));
+    else if (wsIsNeed)
+        startWS("wss://socket.blockcypher.com/v1/btc/test3", wsIsNeed);
 }, 20000);
 
 const port = process.env.PORT_BTC3 || 8103;
@@ -288,38 +305,3 @@ app.listen(port, () => {
         new Date().toString() + `: Microservice btc_svc listening on ${port}`
     );
 });
-
-function waitConfirmation(hash) {
-    console.log("creating webhook");
-    var webhook = {
-        event: "tx-confirmation",
-        hash: hash,
-        confirmations: 1,
-        url: "http://178.62.224.216:8201/btc3/txconfirm"
-    };
-    var url = "https://api.blockcypher.com/v1/btc/test3/hooks?token=" + token;
-    axios
-        .post(url, JSON.stringify(webhook))
-        .then(function(d) {
-            console.log(d);
-        })
-        .catch(function(err) {
-            myErrorHandler(err.message);
-        });
-}
-/*
-            wss.on('connection', (ws: ExtWebSocket) => {
-
-                ws.isAlive = true;
-
-                ws.on('pong', () => {
-                    ws.isAlive = true;
-                });
-
-                //connection is up, let's add a simple simple event
-                ws.on('message', (message: string) => { 
-                    //[...]
-                }
-            });
-
-            */
