@@ -11,14 +11,22 @@ const express = require("express"),
     eth = require("../../private/keystore/youdex"),
     Web3 = require("web3"),
     EthJS = require("ethereumjs-tx"),
-    gasLimit = 4700000,
-    alice = require("../../private/keystore/alice"), //  address and private key in Ethereum (Youdex) and Bitcoin;
-    bob = require("../../private/keystore/bob"); //  address and private key in Ethereum (Youdex) and Bitcoin;
 
-var gasPrice = 0;
-Eth3 = "";
+    //  Global variables
+    Eth3 = new Web3(new Web3.providers.HttpProvider(eth.url + eth.token));
+alice = require("../../private/keystore/alice"); //  address and private key in Ethereum (Youdex) and Bitcoin;
+bob = require("../../private/keystore/bob"); //  address and private key in Ethereum (Youdex) and Bitcoin;
+plasmoid = require("../../private/keystore/plasmoid"); //  address and private key in Ethereum (Youdex);
+gasLimit = gasPrice = '';
+userActive = 0; //  init variables
 
-app.use(function (req, res, next) {
+myErrorHandler = function(message, res) {
+    if (res) res.json({ error: true, response: 'Error: ' + message });
+    console.log((new Date()).toYMDTString() + 'Error: ' + message);
+};
+
+
+app.use(function(req, res, next) {
 
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,24 +45,40 @@ app.use(function (req, res, next) {
     next();
 });
 
+Date.prototype.toYMDTString = function() {
+    return isNaN(this) ? 'NaN' : [this.getFullYear(), this.getMonth() > 8 ? this.getMonth() + 1 : '0' + (this.getMonth() + 1),
+        this.getDate() > 9 ? this.getDate() : '0' + this.getDate()
+    ].join('/') + ' ' + [this.getUTCHours() < 10 ? '0' + this.getUTCHours() : this.getUTCHours(),
+        this.getMinutes() < 10 ? '0' + this.getMinutes() : this.getMinutes(),
+        this.getSeconds() < 10 ? '0' + this.getSeconds() : this.getSeconds()
+    ].join(':')
+};
+
+initApi = function(mess, res) {
+    Eth3.eth.getGasPrice(function(error, result) { //  calculate gas price
+        if (error) next(error)
+        else {
+            gasPrice = Eth3.toHex(result);
+            gasLimit = Eth3.toHex(4700000);
+            if (res) res.json({ error: false, host: eth.url, gasPrice: result });
+            console.log((new Date()).toYMDTString() + ' ' + mess + ', ' + 'gasPrice ' + result + '\n');
+        };
+    });
+};
+
+initApi('connect to ETH RPC server at ' + eth.url);
+
 //  Route - userActive function 
 app.get("/eth/user/:data", (req, res) => {
     res.json({ busy: false });
 })
 
-//  Route - API initialization function 
-app.get("/eth/api/", (req, res) => {
-    Eth3 = new Web3(new Web3.providers.HttpProvider(eth.url + eth.token));
-    Eth3.eth.getGasPrice(function(error, result) {
-        if (!error) {
-            gasPrice = result;
-            res.json({ error: false, host: eth.url, gasPrice: result });
-        } else {
-            res.json({ error: true});
-            console.log("Error! " + error);
-        }
-    });
+//  Route - connect to API provider, set global variables YODA3, gasPrice
+app.get("/eth/api/:data", function(req, res) {
+    const mess = req.params.data || ('API prvider ' + eth.url);
+    initApi('service ' + req.params.data + ' connected', res);
 });
+
 
 //  Route - Balance by name function (only for Atomic Swap Demo) 
 app.get("/eth/balance/:name", (req, res) => {
@@ -65,7 +89,7 @@ app.get("/eth/balance/:name", (req, res) => {
             res.json({ error: false, balance: balance, address: addrs });
         } else {
             res.json({ error: true });
-            console.log("Error! p: " + provider.host + " not response!!!");
+            console.log("Error! p: ETH not response!!!");
         }
     })
 });
@@ -79,55 +103,55 @@ app.get("/eth/address/:addrs", (req, res) => {
             res.json({ error: false, balance: balance, address: addrs });
         } else {
             res.json({ error: true });
-            console.log("Error! p: " + provider.host + " not response!!!");
+            console.log("Error! p: ETH not response!!!");
         }
     })
 });
 
 //  Route - makeTx function
 app.get("/eth/makeTx/:data", (req, res) => {
-        const data = JSON.parse(req.params.data),
-            from = eval(data.from).ethAddrs,
-            to = eval(data.to).ethAddrs,
-            valueE = data.valueE;
-        Eth3.eth.getTransactionCount(from, function(error, result) {
-            if (!error) {
-                countTx = result;
-                const txParams = {
-                    nonce: Eth3.toHex(countTx),
-                    gasPrice: Eth3.toHex(gasPrice),
-                    gasLimit: Eth3.toHex(gasLimit),
-                    to: to,
-                    value: Eth3.toHex(valueE),
-                    data: "0x0"
-                        // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
-                        // chainId: YODA3.toHex(1337)
-                };
-                console.log(txParams.nonce + " " + txParams.gasPrice + " " +
-                    txParams.gasLimit + " " + txParams.to + " " + txParams.value +
-                    " " + txParams.data);
-                var tx = new EthJS(txParams);
-                console.log("tx success key " + eval(data.from).ethKey);
-                const privateKey = new Buffer(eval(data.from).ethKey, "hex");
-                tx.sign(privateKey);
-                var serializedTx = tx.serialize();
-                Eth3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"), function(
-                    err, hash) {
-                    if (!err) {
-                        console.log(data.from + " ETH Tx hash " + hash);
-                        res.json({ hash: hash });
-                    } else {
-                        console.log(err);
-                        err.status = 501;
-                        res.send(err);
-                    }
-                });
-            } else {
-                res.json({ error: true });
-                console.log("Error! p: " + provider.host + " not connected!!!");
-            }
-        });
-    })
+    const data = JSON.parse(req.params.data),
+        from = eval(data.from).ethAddrs,
+        to = eval(data.to).ethAddrs,
+        valueE = data.valueE;
+    Eth3.eth.getTransactionCount(from, function(error, result) {
+        if (!error) {
+            countTx = result;
+            const txParams = {
+                nonce: Eth3.toHex(countTx),
+                gasPrice: gasPrice,
+                gasLimit: gasLimit,
+                to: to,
+                value: Eth3.toHex(valueE),
+                data: "0x0"
+                    // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
+                    // chainId: YODA3.toHex(1337)
+            };
+            //            console.log(txParams.nonce + " " + txParams.gasPrice + " " +
+            //                txParams.gasLimit + " " + txParams.to + " " + txParams.value +
+            //                " " + txParams.data);
+            var tx = new EthJS(txParams);
+            //            console.log("tx success key " + eval(data.from).ethKey);
+            const privateKey = new Buffer(eval(data.from).ethKey, "hex");
+            tx.sign(privateKey);
+            var serializedTx = tx.serialize();
+            Eth3.eth.sendRawTransaction("0x" + serializedTx.toString("hex"), function(
+                err, hash) {
+                if (!err) {
+                    console.log(data.from + " ETH Tx hash " + hash);
+                    res.json({ hash: hash });
+                } else {
+                    console.log(err);
+                    err.status = 501;
+                    res.send(err);
+                }
+            });
+        } else {
+            res.json({ error: true });
+            console.log("Error! p: ETH not connected!!!");
+        }
+    });
+})
 
 //  Route - makeTxAddrs function
 app.get("/eth/makeTxAddrs/:data", (req, res) => {
@@ -148,9 +172,9 @@ app.get("/eth/makeTxAddrs/:data", (req, res) => {
                     // EIP 155 chainId - mainnet: 1, ropsten: 3, 1337 - private
                     // chainId: YODA3.toHex(1337)
             };
-            console.log(txParams.nonce + " " + txParams.gasPrice + " " +
-                txParams.gasLimit + " " + txParams.to + " " + txParams.value +
-                " " + txParams.data);
+            //           console.log(txParams.nonce + " " + txParams.gasPrice + " " +
+            //               txParams.gasLimit + " " + txParams.to + " " + txParams.value +
+            //               " " + txParams.data);
             var tx = new EthJS(txParams);
             console.log("tx success key " + eval(data.from).ethKey);
             const privateKey = new Buffer(eval(data.from).ethKey, "hex");
@@ -168,15 +192,14 @@ app.get("/eth/makeTxAddrs/:data", (req, res) => {
                 }
             });
         } else {
-//            res.header("Access-Control-Allow-Origin", "*");
             res.json({ error: true });
-            console.log("Error! " + provider.host + " not response!!!");
+            console.log("Error! ETH not response!!!");
         }
     });
 })
 
 
-    //  Route - waitTx function
+//  Route - waitTx function
 app.get("/eth/waitTx/:data", (req, res) => {
     hash = req.params.data;
     console.log("wait ETH confirmation tx " + hash)
@@ -203,11 +226,26 @@ app.get("/eth/waitTx/:data", (req, res) => {
                 }
             } else {
                 res.json({ error: true });
-                console.log("Error! p: " + provider.host + " not connected!!!");
+                console.log("Error! p: ETH not connected!!!");
             }
         });
     }, 2000);
 });
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+    var err = new Error('\"' + req.url + '\"' + ' route not support');
+    err.status = 404;
+    next(err);
+});
+
+
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.send(err)
+    console.log((new Date()).toYMDTString() + ' ' + err.message);
+});
+
 
 const port = process.env.PORT_ETH || 8200;
 

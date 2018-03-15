@@ -52,7 +52,7 @@ Date.prototype.toYMDTString = function() {
 
 myErrorHandler = function(message, res) {
     if (res) res.json({ error: true, response: "Error: " + message });
-    console.log((new Date()).toYMDTString() + "Error: " + message); 
+    console.log((new Date()).toYMDTString() + "Error: " + message);
 };
 
 //  CORS
@@ -88,7 +88,7 @@ app.get("/btc3/txhash/", (req, res) => {
 });
 
 //  Route - check connect to API provider
-app.get("/btc3/api/", (req, res) => {
+app.get("/btc3/api/:data", (req, res) => {
     axios
         .get(btc.url)
         .then(response => {

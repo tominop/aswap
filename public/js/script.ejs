@@ -174,7 +174,7 @@
                     console.log(err.status + err.responseText)
                 })
     //  Bob's ETH transfer
-//    return;
+    return;
             showMess('Bob send ' + valueETH.toFixed(3) + 'ETH Tx to Ethereum');
             var jsonData = JSON.stringify({ from: 'bob', to: 'alice', valueE: valueETH * 10 ** 18});
             $.get(hostEthApi + 'makeTx/' + jsonData)
