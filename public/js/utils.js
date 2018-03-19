@@ -170,13 +170,13 @@ function showBalances() {
             if (isYODAApi) {
                 balanceYODA('alice')
                 balanceYODA('bob')
-                balanceYODA('plasmoid')
+                balanceYODA('plazmoid')
             } else showMess('Init YODA API error!')
         }, 3000)
     } else {
         balanceYODA('alice')
         balanceYODA('bob')
-        balanceYODA('plasmoid')
+        balanceYODA('plazmoid')
     }
 }
 
@@ -223,7 +223,7 @@ function balanceYODA(user) {
             document.getElementById(user + 'YODABalance').innerText = summETH.toFixed(3);
             if (user == "alice") summYODAA = summETH;
             else if (user == "bob") summYODAB = summETH;
-            else if (user == "plasmoid") summYODAP = summETH;
+            else if (user == "plazmoid") summYODAP = summETH;
         })
         .fail(function(err) {
             isApi = false;
@@ -242,10 +242,10 @@ function showPrices() {
             YODAPrice = (1.0 / 1000.0).toFixed(6);
             YODAPrice_s = YODAPrice.toString();
             isPrice = true;
-            document.getElementById('plasmoidPrices').innerText = 'ETH/BTC= ' + ethPriceBTC_s + '; ETH/USD= ' + ethPriceUSD_s + '; YODA/ETH= ' + YODAPrice_s + ';';
+            document.getElementById('plazmoidPrices').innerText = 'ETH/BTC= ' + ethPriceBTC_s + '; ETH/USD= ' + ethPriceUSD_s + '; YODA/ETH= ' + YODAPrice_s + ';';
         })
         .fail(function(err) {
-            document.getElementById('plasmoidPrices').innerText = hostPrice + ' not response!';
+            document.getElementById('plazmoidPrices').innerText = hostPrice + ' not response!';
             isPrice = false;
             isApi = false;
             console.log(err.status + err.responseText);
@@ -343,8 +343,8 @@ function semafor(a, b, c) {
     else if (a == 0) document.getElementById('aliceLed').style = greenLed;
     if (b == 1) document.getElementById('bobLed').style = redLed;
     else if (b == 0) document.getElementById('bobLed').style = greenLed;
-    if (c == 1) document.getElementById('plasmoidLed').style = redLed;
-    else if (c == 0) document.getElementById('plasmoidLed').style = greenLed;
+    if (c == 1) document.getElementById('plazmoidLed').style = redLed;
+    else if (c == 0) document.getElementById('plazmoidLed').style = greenLed;
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
         if ((new Date().getTime() - start) > 2 * 100) {
